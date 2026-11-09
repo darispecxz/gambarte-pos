@@ -1,0 +1,189 @@
+<div class="b-head">
+  <div class="b-head-icon"><mat-icon>account_balance</mat-icon></div>
+  <div class="b-head-text">
+    <h2>Cuentas bancarias</h2>
+    <span>Saldos, estado de banca y arqueo diario en una sola vista</span>
+  </div>
+  <div class="b-head-actions">
+    <a routerLink="/manuales/bancos" [queryParams]="{tipo:'cuentas'}" class="bank-manual-help">? Manual</a>
+    <button mat-stroked-button type="button" (click)="actualizar()" [disabled]="store.cargandoCuentas() || cargandoBanca">
+      <mat-icon>refresh</mat-icon> Actualizar
+    </button>
+    <button mat-stroked-button type="button" class="open-action" (click)="abrirTodo()"
+            [disabled]="guardando || !banca?.resumen?.sin_abrir">
+      <mat-icon>lock_open</mat-icon> Abrir pendientes
+    </button>
+  </div>
+</div>
+
+<mat-card appearance="outlined" class="b-card filter-card">
+  <div class="account-toolbar">
+    <mat-form-field appearance="outline" class="filter-field bank-filter" subscriptSizing="dynamic">
+      <mat-label>Bancos con movimiento reciente</mat-label>
+      <mat-select multiple [(ngModel)]="bancosSeleccionados" [disabled]="cargandoActividad">
+        <mat-select-trigger>{{ bancosSeleccionadosLabel() }}</mat-select-trigger>
+        @for (banco of bancosDisponibles; track banco.id) {
+          <mat-option [value]="banco.id">
+            <span class="filter-option"><mat-icon>account_balance</mat-icon>{{ banco.nombre }}</span>
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="filter-field currency-filter" subscriptSizing="dynamic">
+      <mat-label>Moneda</mat-label>
+      <mat-select [(ngModel)]="monedaSeleccionada">
+        <mat-option [value]="0">Todas las monedas</mat-option>
+        @for (moneda of monedasDisponibles; track moneda.id) {
+          <mat-option [value]="moneda.id">{{ moneda.nombre }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="filter-field account-search" subscriptSizing="dynamic">
+      <mat-label>Número de cuenta</mat-label>
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput type="search" [(ngModel)]="busqueda" placeholder="Buscar número de cuenta">
+      @if (busqueda) {
+        <button mat-icon-button matSuffix type="button" aria-label="Limpiar búsqueda" (click)="busqueda = ''">
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+    </mat-form-field>
+  </div>
+</mat-card>
+
+@if (errorBanca) {
+  <div class="b-alert err" role="alert"><mat-icon>error_outline</mat-icon><span>{{ errorBanca }}</span></div>
+}
+
+@if (banca; as estadoBanca) {
+  @if (estadoBanca.resumen.sin_arqueo_anterior) {
+    <div class="b-alert warn" role="status">
+      <mat-icon>warning_amber</mat-icon>
+      <span>{{ estadoBanca.resumen.sin_arqueo_anterior }} cuenta(s) no tienen arqueo anterior; el saldo del libro se usará como referencia de apertura.</span>
+    </div>
+  }
+  <div class="b-alert info" role="note">
+    <mat-icon>info</mat-icon>
+    <span>El <strong>saldo del sistema</strong> es el saldo contable actual. La apertura y el cierre registran el saldo absoluto contado; cualquier diferencia de cierre requiere motivo.</span>
+  </div>
+}
+
+@if (!grupos.length && (store.cargandoCuentas() || cargandoActividad)) {
+  <mat-card appearance="outlined" class="b-card loading-card" role="status" aria-live="polite">
+    <mat-spinner diameter="38" color="primary" aria-label="Cargando cuentas"></mat-spinner>
+    <div class="loading-copy"><strong>Cargando cuentas bancarias</strong><span>Estamos preparando tus cuentas y filtros…</span></div>
+  </mat-card>
+} @else if (!grupos.length) {
+  <mat-card appearance="outlined" class="b-card empty-state">
+    <mat-icon>account_balance</mat-icon>
+    <strong>No hay cuentas bancarias para mostrar</strong>
+    <span>Revisa los filtros de banco, moneda y número de cuenta.</span>
+  </mat-card>
+} @else {
+  @for (grupo of grupos; track grupo.id_entidad) {
+    <mat-card appearance="outlined" class="b-card group-card">
+      <mat-card-content>
+        <div class="group-header">
+          <app-bank-logo [entidad]="grupo.entidad" [size]="42"></app-bank-logo>
+          <div class="group-title">
+            <h3>{{ grupo.entidad }}</h3>
+            <small>{{ grupo.cuentas.length }} cuenta(s) en {{ grupo.monedas.length }} moneda(s)</small>
+          </div>
+          <div class="entity-totals">
+            @for (moneda of grupo.monedas; track moneda.id_moneda) {
+              <span><strong>{{ moneda.saldo | number:'1.2-2' }}</strong> {{ moneda.moneda }}</span>
+            }
+          </div>
+        </div>
+
+        @for (moneda of grupo.monedas; track moneda.id_moneda) {
+          @let arqueoGrupo = grupoBancaDeGrupo(moneda, grupo.id_entidad);
+          <section class="currency-section">
+            <div class="currency-header">
+              <div class="currency-title">
+                <h4>{{ moneda.moneda }}</h4>
+                <span>{{ moneda.cuentas.length }} cuenta(s) · saldo de libro {{ moneda.saldo | number:'1.2-2' }} {{ moneda.moneda }}</span>
+              </div>
+              <div class="group-actions">
+                @if (arqueoGrupo?.puede_abrir) {
+                  <button mat-stroked-button type="button" class="open-action" (click)="abrirGrupo(arqueoGrupo!)" [disabled]="guardando">
+                    <mat-icon>lock_open</mat-icon> Abrir {{ pendientesDeAbrir(arqueoGrupo!) }}
+                  </button>
+                }
+                @if (arqueoGrupo?.puede_cerrar) {
+                  <button mat-stroked-button type="button" class="close-action" (click)="cerrarGrupo(arqueoGrupo!)" [disabled]="guardando">
+                    <mat-icon>lock</mat-icon> Cerrar {{ abiertasDeGrupo(arqueoGrupo!) }} cuenta(s)
+                  </button>
+                }
+              </div>
+            </div>
+
+        <div class="bank-account-list">
+          @for (cuenta of moneda.cuentas; track trackCuenta($index, cuenta)) {
+            @let estado = getEstado(cuenta);
+            <article class="bank-account-row" [class]="'bank-account-row ' + estadoClass(bancaEstado(cuenta))" [class.foreign-row]="!cuenta.propia">
+              <span class="bank-account-icon"><mat-icon>account_balance</mat-icon></span>
+              <div class="bank-account-summary">
+                <div class="bank-account-title">
+                  <strong>{{ cuenta.agencia_abr }} · {{ cuenta.num_cuenta }}</strong>
+                  <span [class]="'estado-badge ' + estadoClass(bancaEstado(cuenta))">{{ estadoLabel(bancaEstado(cuenta)) }}</span>
+                </div>
+                <small>{{ cuenta.agencia }} · {{ cuenta.tipo_cuenta_abr }}{{ !cuenta.propia ? ' · Solo consulta' : '' }}</small>
+              </div>
+              <div class="bank-account-balance">
+                <span>Saldo sistema</span>
+                <strong [class.negative]="cuenta.saldo < 0">{{ cuenta.saldo | number:'1.2-2' }} {{ cuenta.moneda }}</strong>
+              </div>
+              <div class="bank-account-counted">
+                @if (!cuenta.propia) {
+                  <span class="b-muted">—</span>
+                } @else if (estado?.estado === 'abierta') {
+                  <div class="bank-account-balance"><span>Saldo de apertura</span><strong>{{ estado!.saldo_apertura | number:'1.2-2' }} {{ cuenta.moneda }}</strong></div>
+                } @else if (estado?.estado === 'cerrada') {
+                  <div class="bank-account-balance"><span>Saldo cierre</span><strong>{{ estado!.saldo_cierre | number:'1.2-2' }} {{ cuenta.moneda }}</strong></div>
+                } @else {
+                  <span class="b-muted">Pendiente de apertura</span>
+                }
+              </div>
+              <div class="bank-account-difference">
+                @if (cuenta.propia && estado?.estado === 'abierta') {
+                  <span>Diferencia apertura</span>
+                  <strong [class.positive]="diferenciaApertura(estado!) === 0" [class.negative]="diferenciaApertura(estado!) !== 0">{{ diferenciaApertura(estado!) | number:'1.2-2' }} {{ cuenta.moneda }}</strong>
+                } @else if (cuenta.propia && estado?.estado === 'cerrada') {
+                  <span>Diferencia</span>
+                  <strong [class.positive]="estado!.diferencia === 0" [class.negative]="estado!.diferencia !== 0">{{ estado!.diferencia | number:'1.2-2' }} {{ cuenta.moneda }}</strong>
+                }
+              </div>
+              <div class="bank-account-actions">
+                <button mat-button class="movement-action" type="button" (click)="verMovimientos(cuenta)">
+                  <mat-icon>receipt_long</mat-icon><span>Movimientos</span>
+                </button>
+                @if (cuenta.propia && soportaConciliacion(cuenta.entidad)) {
+                  <button mat-button class="reconcile-action" type="button" (click)="toggleConciliar(cuenta)">
+                    <mat-icon>{{ estado?.clave === conciliando ? 'expand_less' : 'fact_check' }}</mat-icon><span>{{ estado?.clave === conciliando ? 'Ocultar' : 'Conciliar' }}</span>
+                  </button>
+                }
+              </div>
+            </article>
+          }
+        </div>
+
+        @for (cuenta of moneda.cuentas; track cuenta.num_cuenta) {
+          @if (getEstado(cuenta); as estado) {
+            @if (conciliando === estado.clave) {
+              <div class="inline-reconciliation">
+                @if (cuentaBancoDe(estado); as cuentaCompleta) {
+                  <app-bancos-conciliacion [cuentaFija]="cuentaCompleta" [embebido]="true"></app-bancos-conciliacion>
+                } @else {
+                  <span class="b-muted">No se pudo resolver la cuenta para conciliar; actualiza los datos.</span>
+                }
+              </div>
+            }
+          }
+        }
+          </section>
+        }
+      </mat-card-content>
+    </mat-card>
+  }
+}

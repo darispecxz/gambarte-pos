@@ -1,0 +1,67 @@
+<mat-drawer-container class="page-drawer-container" [class.fullscreen-open]="panelDerechoAbierto" [hasBackdrop]="true">
+  <mat-drawer-content class="page-drawer-content">
+    <div class="ei-page">
+      <header class="page-heading">
+        <span class="heading-icon"><mat-icon>account_balance_wallet</mat-icon></span>
+        <div><h1 class="page-title">Egresos e ingresos</h1><p>Registra movimientos y revisa su estado de autorización.</p></div>
+        <a mat-stroked-button class="manual-help-link" routerLink="/manuales/egresos-ingresos" [queryParams]="{tipo:'egreso'}"><mat-icon>menu_book</mat-icon>Manual</a>
+      </header>
+
+      <section class="cash-toolbar" *ngIf="cajasAbiertas.length">
+        <div class="cash-picker">
+          <div class="cash-picker-label"><mat-icon>point_of_sale</mat-icon><div><strong>Caja de trabajo</strong><span>Busca por número o moneda</span></div></div>
+          <mat-form-field appearance="outline" class="caja-field">
+            <mat-label>Buscar caja</mat-label>
+            <input matInput [(ngModel)]="cajaBusqueda" [matAutocomplete]="cajaAuto" placeholder="Ej. Caja 29 o BOB" autocomplete="off">
+            <mat-icon matSuffix>search</mat-icon>
+            <mat-autocomplete #cajaAuto="matAutocomplete" (optionSelected)="seleccionarCaja($event.option.value)">
+              <mat-option *ngFor="let c of cajasFiltradas" [value]="c"><span class="cash-option"><strong>{{ c.moneda }}</strong><small>Caja {{ c.num_caja }} · Saldo {{ c.saldo_actual | number:'1.2-2' }}</small></span></mat-option>
+              <mat-option *ngIf="!cajasFiltradas.length" disabled>No hay coincidencias</mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+        </div>
+        <div class="cash-balance" *ngIf="selectedCaja; else noCajaSelected"><div class="balance-icon"><mat-icon>account_balance_wallet</mat-icon></div><div class="balance-copy"><span>Disponible en caja {{ selectedCaja.num_caja }}</span><strong>{{ selectedCaja.saldo_actual | number:'1.2-2' }} <small>{{ selectedCaja.moneda }}</small></strong></div></div>
+        <ng-template #noCajaSelected><div class="cash-balance cash-balance-empty"><mat-icon>info</mat-icon><span>Selecciona una caja para continuar</span></div></ng-template>
+      </section>
+      <div class="no-cajas" *ngIf="!loading && cajasAbiertas.length === 0"><mat-icon>info</mat-icon><span>No tienes cajas abiertas. Abre una desde <strong>Mis Cajas</strong> para registrar movimientos.</span></div>
+
+      <div class="content" *ngIf="selectedCaja">
+        <div class="movement-workspace">
+          <section class="movement-list-pane">
+            <div class="list-pane-header"><div><h2>Movimientos registrados</h2><p>Hoy · {{ selectedCaja.moneda }}</p></div><button mat-flat-button color="primary" type="button" (click)="iniciarRegistro()"><mat-icon>add</mat-icon>Nuevo</button></div>
+            <div class="history-state" *ngIf="loadingMovimientos"><mat-icon>hourglass_top</mat-icon>Cargando…</div>
+            <div class="empty-history" *ngIf="!loadingMovimientos && movimientos.length === 0"><mat-icon>receipt_long</mat-icon><strong>Aún no hay movimientos</strong><span>Los registros de esta caja aparecerán aquí.</span></div>
+            <div class="movement-list" *ngIf="!loadingMovimientos && movimientos.length">
+              <button class="movement-row" *ngFor="let mov of movimientos" [class.selected]="movimientoSeleccionado?.uuid === mov.uuid" [class.expense]="movimientoClase(mov) === 'expense'" [class.income]="movimientoClase(mov) === 'income'" [class.bank]="movimientoClase(mov) === 'bank'" (click)="seleccionarMovimiento(mov)">
+                <span class="movement-icon" [class]="'movement-icon ' + movimientoClase(mov)"><mat-icon>{{ movimientoIcono(mov) }}</mat-icon></span>
+                <span class="movement-title"><span class="movement-title-line"><strong>{{ movimientoTitulo(mov) }}</strong><span class="estado-badge" [class]="'estado-badge ' + movimientoEstadoClase(mov)">{{ movimientoEstado(mov) }}</span></span><small>{{ mov.created_at | date:'HH:mm' }} · {{ movimientoSubtitulo(mov) }}</small></span>
+                <strong class="movement-amount" [class.negative]="mov.tipo_operacion === 'egreso'">{{ mov.tipo_operacion === 'egreso' ? '−' : '+' }} {{ mov.monto | number:'1.2-2' }} {{ mov.moneda }}</strong>
+              </button>
+            </div>
+          </section>
+        </div>
+      </div>
+      <div class="loading" *ngIf="loading"><mat-icon>hourglass_top</mat-icon>Cargando cajas…</div>
+    </div>
+  </mat-drawer-content>
+
+  <mat-drawer class="movement-side-panel" position="end" mode="over" style="position:fixed; top:58px; right:0; bottom:0; height:auto; margin:0; border-radius:0; width:var(--movement-panel-width) !important; min-width:0; max-width:100%;" [opened]="panelDerechoAbierto" (closedStart)="cerrarPanel()">
+    <div class="ops-cards" *ngIf="creatingMovement && !selectedOp">
+      <div class="new-movement-heading"><div><h2>Nuevo movimiento</h2><p>Elige el tipo de operación.</p></div><button mat-icon-button type="button" (click)="cancelarRegistro()" aria-label="Cerrar"><mat-icon>close</mat-icon></button></div>
+      <section class="operation-group" *ngFor="let group of gruposOperaciones"><div class="group-heading"><h3>{{ group.title }}</h3></div><div class="group-options">
+        <button *ngFor="let op of group.items" class="op-card" (click)="selectOp(op.key)" [disabled]="!operacionDisponible(op)" [style.--op-color]="op.color"><span class="op-card-icon"><mat-icon>{{ op.icon }}</mat-icon></span><span class="op-card-text"><strong class="op-card-label">{{ op.label }}</strong><small class="op-card-desc">{{ !operacionDisponible(op) ? 'Disponible solo para cajas BOB o USD' : op.desc }}</small></span><mat-icon class="op-arrow">chevron_right</mat-icon></button>
+      </div></section>
+    </div>
+
+    <app-movimiento-detalle *ngIf="!creatingMovement && !selectedOp && movimientoSeleccionado as mov" [movimiento]="mov" (cerrar)="cerrarPanel()"></app-movimiento-detalle>
+
+    <app-movimiento-formulario *ngIf="selectedOp"
+      [operacion]="selectedOp" [titulo]="selectedOpConfig?.label || ''" [moneda]="selectedCaja?.moneda || ''"
+      [selectedCaja]="selectedCaja" [form]="form" [attempted]="attempted" [submitting]="submitting"
+      [puedeEnviar]="puedeEnviar" [selectedFile]="selectedFile" [fileError]="fileError"
+      [buscandoAsiento]="buscandoAsiento" [asientoEncontrado]="asientoEncontrado" [submitLabel]="submitLabel"
+      (volver)="goBack()" (cancelar)="cancelarRegistro()" (enviar)="ejecutar()"
+      (archivoSeleccionado)="onFileSelected($event)" (buscarComprobante)="buscarAsiento($event)">
+    </app-movimiento-formulario>
+  </mat-drawer>
+</mat-drawer-container>

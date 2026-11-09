@@ -1,0 +1,152 @@
+<header class="transfer-page-head">
+  <div class="b-head-icon"><mat-icon>swap_horiz</mat-icon></div>
+  <div>
+    <h3>Traspasos bancarios</h3>
+    <p>Consulta movimientos entre agencias o registra un nuevo traspaso.</p>
+  </div>
+  <a routerLink="/manuales/bancos" [queryParams]="{tipo:'traspasos'}" class="bank-manual-help">? Manual</a>
+  <button class="b-btn b-btn-primary" type="button" (click)="abrirNuevo()"><mat-icon>add</mat-icon> Nuevo traspaso</button>
+</header>
+
+<nav class="b-subtabs" aria-label="Lista de traspasos">
+  <button type="button" [class.active]="sub === 'lista'" (click)="setSub('lista')">Todos</button>
+  <button type="button" [class.active]="sub === 'recibir'" (click)="setSub('recibir')">
+    Por recibir @if (pendientes.length) { <span class="b-dot">{{ pendientes.length }}</span> }
+  </button>
+</nav>
+
+<section class="b-card transfer-list-card">
+  <header class="transfer-list-head">
+    <div>
+      <h3>{{ sub === 'recibir' ? 'Traspasos por recibir' : 'Movimientos registrados' }}</h3>
+      <p>{{ listaVisible.length }} de {{ (sub === 'recibir' ? pendientes : traspasos).length }} traspaso(s) · {{ sub === 'recibir' ? 'Pendientes de confirmación en esta agencia' : 'Historial de transferencias entre agencias' }}</p>
+    </div>
+    <div class="transfer-list-actions">
+      @if (sub === 'lista') {
+        <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Estado</mat-label><mat-select [(ngModel)]="filtroEstado" (ngModelChange)="loadTraspasos()"><mat-option value="TODO">Todos</mat-option><mat-option value="P">Pendientes</mat-option><mat-option value="A">Aceptados</mat-option><mat-option value="X">Rechazados</mat-option><mat-option value="R">Revertidos</mat-option></mat-select></mat-form-field>
+      }
+      <button class="b-btn b-btn-outline b-btn-sm" type="button" (click)="sub === 'recibir' ? loadPendientes() : loadTraspasos()" [disabled]="cargandoLista"><mat-icon>refresh</mat-icon> Actualizar</button>
+    </div>
+  </header>
+
+  <div class="transfer-filters">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-icon matPrefix>search</mat-icon><input matInput [(ngModel)]="filtroTexto" placeholder="Buscar traspaso"></mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Desde</mat-label><input matInput type="date" [(ngModel)]="filtroDesde"></mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Hasta</mat-label><input matInput type="date" [(ngModel)]="filtroHasta"></mat-form-field>
+  </div>
+
+  @if (cargandoLista && !listaVisible.length) {
+    <div class="transfer-loading" role="status"><mat-icon>sync</mat-icon><span>Cargando traspasos…</span></div>
+  } @else if (!listaVisible.length) {
+    <div class="transfer-empty"><mat-icon>{{ (sub === 'recibir' ? pendientes : traspasos).length ? 'search_off' : 'swap_horiz' }}</mat-icon><strong>{{ (sub === 'recibir' ? pendientes : traspasos).length ? 'Sin resultados' : (sub === 'recibir' ? 'No hay traspasos por recibir' : 'Aún no hay traspasos') }}</strong><span>{{ (sub === 'recibir' ? pendientes : traspasos).length ? 'Prueba con otro texto de búsqueda.' : (sub === 'recibir' ? 'Cuando otra agencia envíe un traspaso, aparecerá aquí.' : 'Registra un nuevo traspaso para que aparezca en esta lista.') }}</span></div>
+  } @else {
+    <div class="transfer-list">
+      @for (t of listaVisible; track t.id) {
+        <button type="button" class="transfer-row" [ngClass]="estadoClass(t.estado)" [class.selected]="traspasoSeleccionado?.id === t.id" (click)="verDetalle(t)">
+          <span class="transfer-row-icon"><mat-icon>{{ t.estado === 'A' ? 'check' : t.estado === 'X' || t.estado === 'R' ? 'south_west' : 'swap_horiz' }}</mat-icon></span>
+          <span class="transfer-main"><strong>Traspaso bancario <span class="transfer-role-badge" [ngClass]="'role-' + rolAgencia(t)">{{ rolAgencia(t) }}</span><span class="b-badge" [ngClass]="estadoClass(t.estado)">{{ t.estado_label }}</span></strong><small>{{ t.fecha | date:'dd/MM/yyyy HH:mm' }} · {{ t.documento_origen ? 'N° ' + t.documento_origen : 'Sin referencia' }}</small></span>
+          <span class="transfer-route"><small>{{ t.agencia_origen_abr }} → {{ t.agencia_destino_abr }}</small><strong>{{ t.entidad_origen }} · {{ t.num_cuenta_origen }} → {{ t.entidad_destino }} · {{ t.num_cuenta_destino }}</strong></span>
+          <strong class="transfer-amount">{{ t.monto | number:'1.2-2' }} {{ t.moneda }}</strong>
+          <mat-icon class="transfer-chevron">chevron_right</mat-icon>
+        </button>
+      }
+    </div>
+  }
+</section>
+
+@if (drawerMode) {
+  <div class="transfer-backdrop" (click)="cerrarDrawer()"></div>
+  <aside class="transfer-drawer" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    @if (drawerMode === 'new') {
+      <header class="drawer-head">
+        <span class="drawer-head-icon"><mat-icon>swap_horiz</mat-icon></span>
+        <div class="drawer-head-copy"><h3>Nuevo traspaso</h3><p>Completa los datos de las cuentas de origen y destino.</p></div>
+        <button class="b-btn b-btn-ghost b-btn-xs" type="button" aria-label="Cerrar" (click)="cerrarDrawer()"><mat-icon>close</mat-icon></button>
+      </header>
+      <div class="drawer-body drawer-form">
+        @if (errorTraspaso) { <div class="b-alert err" role="alert">{{ errorTraspaso }}</div> }
+        <div class="b-grid2 transfer-accounts-grid">
+          <fieldset class="b-fieldset">
+            <legend><span>Origen <small>· se debita ahora</small></span></legend>
+            <div class="transfer-bank-marker origin-bank-icon"><mat-icon>account_balance</mat-icon></div>
+            <label class="b-label">Agencia</label>
+            <app-searchable-select [items]="store.misAgencias()" valueKey="id_agencia" labelKey="descripcion" placeholder="Buscar agencia…" [(ngModel)]="traspaso.id_agencia_origen" (selectionChange)="onAgenciaOrigenChange()"></app-searchable-select>
+            <label class="b-label">Cuenta</label>
+            <app-searchable-select [items]="cuentasOrigenOpc" valueKey="id" labelKey="label" placeholder="Buscar cuenta…" [(ngModel)]="cuentaOrigenSelId" (selectionChange)="onCuentaOrigenChange()"></app-searchable-select>
+            @if (cuentaOrigen) { <div class="b-hint">Saldo disponible: <strong>{{ cuentaOrigen.saldo | number:'1.2-2' }} {{ cuentaOrigen.moneda }}</strong></div> }
+          </fieldset>
+          <div class="transfer-flow-arrow" aria-hidden="true"><mat-icon>arrow_forward</mat-icon></div>
+          <fieldset class="b-fieldset">
+            <legend><span>Destino <small>· recibe al confirmar</small></span></legend>
+            <div class="transfer-bank-marker destination-bank-icon"><mat-icon>account_balance</mat-icon></div>
+            <label class="b-label">Agencia</label>
+            <app-searchable-select [items]="store.agencias()" valueKey="id_agencia" labelKey="descripcion" placeholder="Buscar agencia…" [(ngModel)]="traspaso.id_agencia_destino" (selectionChange)="onAgenciaDestinoChange()"></app-searchable-select>
+            <label class="b-label">Cuenta @if (cuentaOrigen) { <span class="b-muted">(solo {{ cuentaOrigen.moneda }})</span> }</label>
+            <select class="b-input" [(ngModel)]="cuentaDestinoSelId" aria-label="Cuenta bancaria de destino">
+              <option [ngValue]="0">Seleccionar cuenta…</option>
+              @for (opcion of cuentasDestinoOpc; track opcion.id) { <option [ngValue]="opcion.id">{{ opcion.label }}</option> }
+            </select>
+            @if (cargandoCuentasTraspaso && traspaso.id_agencia_destino) { <div class="b-hint b-muted">Cargando cuentas de la agencia…</div> }
+            @else if (!cuentasDestino.length && traspaso.id_agencia_destino) { <div class="b-hint b-muted">No hay cuentas activas en {{ cuentaOrigen?.moneda || 'la moneda seleccionada' }} para esta agencia.</div> }
+          </fieldset>
+        </div>
+        <div class="b-grid2">
+          <div><label class="b-label">Monto <span class="b-muted">{{ cuentaOrigen?.moneda }}</span></label><input class="b-input" type="number" step="0.01" min="0" [(ngModel)]="traspaso.monto" placeholder="0.00"></div>
+          <div><label class="b-label">N° de transacción / comprobante</label><input class="b-input" type="text" [(ngModel)]="traspaso.documento" placeholder="Ej. 59320149719" maxlength="30"></div>
+        </div>
+        <label class="b-label">Observaciones (opcional)</label><input class="b-input" type="text" [(ngModel)]="traspaso.observaciones" maxlength="200">
+        <label class="b-label">Comprobante (opcional)</label>
+        <div class="b-upload"><input type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" (change)="onComprobante($event)"><span class="b-muted b-xsmall">PDF o imagen, máx. 5 MB. Se adjunta al registrar.</span></div>
+        @if (comprobante) { <div class="b-hint">Adjunto listo: <strong>{{ comprobante.name }}</strong></div> }
+        @if (montoExcedeSaldo) { <div class="b-alert warn">El monto supera el saldo de la cuenta de origen.</div> }
+        <div class="b-note">El monto se descuenta de la cuenta de origen al registrar. La agencia destino debe confirmar la recepción para acreditarlo.</div>
+      </div>
+      <footer class="drawer-footer"><button class="b-btn b-btn-outline" type="button" (click)="cerrarDrawer()">Cancelar</button><button class="b-btn b-btn-primary" type="button" [disabled]="!puedeRegistrar || guardando" (click)="registrar()">{{ guardando ? 'Registrando…' : 'Registrar traspaso' }}</button></footer>
+    } @else if (traspasoSeleccionado) {
+      @let t = traspasoSeleccionado;
+      <header class="drawer-head" [ngClass]="'role-' + rolAgencia(t)">
+        <span class="drawer-head-icon" [ngClass]="'role-' + rolAgencia(t)"><mat-icon>swap_horiz</mat-icon></span>
+        <div class="drawer-head-copy"><h3>Traspaso #{{ t.id }}</h3><p>{{ t.fecha | date:'dd/MM/yyyy HH:mm' }}</p></div>
+        <span class="transfer-role-badge header-role-badge" [ngClass]="'role-' + rolAgencia(t)">{{ rolAgencia(t) }}</span>
+        <span class="b-badge" [ngClass]="estadoClass(t.estado)">{{ t.estado_label }}</span>
+        <button class="b-btn b-btn-ghost b-btn-xs" type="button" aria-label="Cerrar" (click)="cerrarDrawer()"><mat-icon>close</mat-icon></button>
+      </header>
+      <div class="drawer-body">
+        <div class="transfer-detail-amount"><span>Monto transferido</span><strong>{{ t.monto | number:'1.2-2' }} {{ t.moneda }}</strong></div>
+        <div class="transfer-detail-grid">
+          <div class="transfer-detail-route">
+            <section class="transfer-route-card origin-route-card">
+              <div class="transfer-route-card-head"><span class="transfer-route-bank-icon"><mat-icon>account_balance</mat-icon></span><span class="transfer-route-label">Origen <small>· se debitó</small></span></div>
+              <strong>{{ t.entidad_origen }} · {{ t.num_cuenta_origen }}</strong>
+              <span class="transfer-route-agency">{{ t.agencia_origen }}</span>
+            </section>
+            <span class="transfer-route-arrow" aria-hidden="true"><mat-icon>arrow_forward</mat-icon></span>
+            <section class="transfer-route-card destination-route-card">
+              <div class="transfer-route-card-head"><span class="transfer-route-bank-icon"><mat-icon>account_balance</mat-icon></span><span class="transfer-route-label">Destino <small>· recibe al confirmar</small></span></div>
+              <strong>{{ t.entidad_destino }} · {{ t.num_cuenta_destino }}</strong>
+              <span class="transfer-route-agency">{{ t.agencia_destino }}</span>
+            </section>
+          </div>
+          <div class="transfer-detail-item"><mat-icon>tag</mat-icon><div><span>Referencia de origen</span><strong>{{ t.documento_origen || '—' }}</strong></div></div>
+          @if (t.documento_destino) { <div class="transfer-detail-item"><mat-icon>receipt_long</mat-icon><div><span>Comprobante de recepción</span><strong>{{ t.documento_destino }}</strong></div></div> }
+          <div class="transfer-detail-item"><mat-icon>person</mat-icon><div><span>Registrado por</span><strong>{{ t.usuario_origen || '—' }}</strong></div></div>
+          @if (t.usuario_destino) { <div class="transfer-detail-item"><mat-icon>person_check</mat-icon><div><span>Recibido por</span><strong>{{ t.usuario_destino }}</strong></div></div> }
+          @if (t.observaciones || t.glosa) { <div class="transfer-detail-item"><mat-icon>notes</mat-icon><div><span>Observaciones</span><strong>{{ t.observaciones || t.glosa }}</strong></div></div> }
+          @if (t.comprobante_path) { <div class="transfer-detail-item"><mat-icon>attach_file</mat-icon><div><span>Comprobante adjunto</span><strong>{{ t.comprobante_nombre || 'Ver comprobante' }}</strong></div></div> }
+        </div>
+        @if (errorTraspaso) { <div class="b-alert err" role="alert">{{ errorTraspaso }}</div> }
+        @if (esRecepcionPendiente && modoRecepcion) {
+          <div class="drawer-receive"><label class="b-label">N° de transacción / comprobante de recepción *</label><input class="b-input" type="text" [(ngModel)]="documentosRecepcion[t.id]" placeholder="Ingresa la referencia" maxlength="30"><p class="b-note">Al confirmar, el monto se acreditará en la cuenta de destino.</p></div>
+        }
+      </div>
+      <footer class="drawer-footer">
+        @if (esRecepcionPendiente && !modoRecepcion) { <button class="b-btn b-btn-ok" type="button" (click)="iniciarRecepcion()"><mat-icon>move_to_inbox</mat-icon> Recibir transferencia</button> }
+        @if (esRecepcionPendiente && modoRecepcion) { <button class="b-btn b-btn-danger" type="button" [disabled]="procesando === t.id" (click)="rechazar(t)">Rechazar</button><button class="b-btn b-btn-outline" type="button" (click)="cancelarRecepcion()">Cancelar</button><button class="b-btn b-btn-ok" type="button" [disabled]="!documentosRecepcion[t.id] || procesando === t.id" (click)="aceptar(t)">{{ procesando === t.id ? 'Confirmando…' : 'Confirmar recepción' }}</button> }
+        @if (t.estado === 'P' && t.id_agencia_origen === store.miAgencia()) { <button class="b-btn b-btn-danger" type="button" (click)="revertir(t)">Revertir traspaso</button> }
+        @if (t.comprobante_path) { <a class="b-btn b-btn-outline" [href]="urlComprobante(t.comprobante_path)" target="_blank" rel="noopener">Ver comprobante</a> }
+        <input #comprobanteDrawer type="file" hidden accept=".pdf,.jpg,.jpeg,.png,.webp" (change)="subirComprobante(t, $event)">
+        <button class="b-btn b-btn-outline" type="button" [disabled]="subiendo === t.id" (click)="comprobanteDrawer.click()">{{ subiendo === t.id ? 'Adjuntando…' : (t.comprobante_path ? 'Reemplazar comprobante' : 'Adjuntar comprobante') }}</button>
+      </footer>
+    }
+  </aside>
+}

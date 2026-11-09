@@ -1,0 +1,22 @@
+@if (svc.state(); as d) {
+  <div class="b-overlay" (click)="svc.cancelar()">
+    <div class="b-dialog" (click)="$event.stopPropagation()">
+      <h3>{{ d.titulo }}</h3>
+      @if (d.detalle) { <p>{{ d.detalle }}</p> }
+      @if (d.campo) {
+        <label class="b-label">{{ d.etiqueta }}</label>
+        <input class="b-input" type="text" [ngModel]="d.valor"
+               (ngModelChange)="svc.setValor($event)"
+               [placeholder]="d.placeholder || ''"
+               (keyup.enter)="svc.confirmar()">
+      }
+      <div class="b-dialog-actions">
+        <button class="b-btn b-btn-outline b-btn-sm" (click)="svc.cancelar()">Cancelar</button>
+        <button class="b-btn b-btn-sm" [class.b-btn-primary]="!d.danger" [class.b-btn-danger]="d.danger"
+                [disabled]="d.campo && d.requerido && !d.valor.trim()" (click)="svc.confirmar()">
+          {{ d.confirmLabel || 'Confirmar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

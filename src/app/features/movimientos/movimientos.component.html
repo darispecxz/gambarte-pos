@@ -1,0 +1,133 @@
+<mat-drawer-container class="cash-page-drawer" [hasBackdrop]="true">
+  <mat-drawer-content class="cash-page-content">
+    <div class="cash-page">
+      <header class="page-heading">
+        <span class="heading-icon"><mat-icon>payments</mat-icon></span>
+        <div><h1>{{ tituloVista }}</h1><p>{{ descripcionVista }}</p></div>
+      </header>
+
+      <div class="no-cajas" *ngIf="!loading && cajasAbiertas.length === 0"><mat-icon>info</mat-icon><span>No tienes cajas abiertas. Abre una desde <strong>Mis Cajas</strong> para registrar movimientos.</span></div>
+
+      <section class="movement-list-card" *ngIf="cajas.length">
+        <header class="list-header">
+          <div><h2>{{ vista === 'cajero' ? 'Traspasos registrados' : 'Movimientos de bóveda' }}</h2><p>{{ movimientosFiltrados.length }} de {{ movimientosVista.length }} movimiento(s) · {{ cajas.length }} caja(s) · {{ monedasDisponibles.join(', ') }}</p></div>
+          <div class="list-actions">
+            <button mat-flat-button color="primary" type="button" (click)="iniciarRegistro()"><mat-icon>add</mat-icon>{{ accionNuevaVista }}</button>
+          </div>
+        </header>
+        <div class="list-filter">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search-filter"><mat-icon matPrefix>search</mat-icon><input matInput [(ngModel)]="filtroTexto" placeholder="Buscar operación, destino o concepto"></mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Moneda</mat-label><mat-select [(ngModel)]="filtroMoneda"><mat-option value="">Todas</mat-option>@for (moneda of monedasDisponibles; track moneda) { <mat-option [value]="moneda">{{ moneda }}</mat-option> }</mat-select></mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Tipo de movimiento</mat-label><mat-select [(ngModel)]="filtroTipo"><mat-option value="">Todos</mat-option>@for (op of operacionesVista; track op.key) { <mat-option [value]="op.key">{{ op.label }}</mat-option> }@if (vista === 'boveda') { <mat-option value="traspaso_boveda">Devolución a bóveda</mat-option><mat-option value="transferencia_boveda">Transferencia entre bóvedas</mat-option> }</mat-select></mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Desde</mat-label><input matInput type="date" [(ngModel)]="fechaDesde"></mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Hasta</mat-label><input matInput type="date" [(ngModel)]="fechaHasta"></mat-form-field>
+          <button mat-flat-button color="primary" type="button" (click)="loadMovimientos()" [disabled]="loadingMovimientos || !fechaDesde || !fechaHasta || fechaDesde > fechaHasta"><mat-icon>search</mat-icon>Buscar</button>
+        </div>
+        @if (loadingMovimientos) {
+          <div class="list-state" role="status"><mat-icon class="spin">progress_activity</mat-icon><strong>Cargando movimientos…</strong></div>
+        } @else if (!movimientosVista.length) {
+          <div class="list-state"><mat-icon>receipt_long</mat-icon><strong>No hay movimientos en este período</strong><span>Prueba con otro rango de fechas o registra una operación.</span><button mat-stroked-button type="button" (click)="iniciarRegistro()"><mat-icon>add</mat-icon>{{ accionNuevaVista }}</button></div>
+        } @else if (!movimientosFiltrados.length) {
+          <div class="list-state"><mat-icon>search_off</mat-icon><strong>No hay resultados</strong><span>Prueba con otro texto de búsqueda.</span></div>
+        } @else {
+          <div class="movement-list">
+            @for (mov of movimientosFiltrados; track mov.uuid + ':' + (mov.id_caja_contexto ?? 'boveda')) {
+              <button type="button" class="movement-row" [class.selected]="movimientoSeleccionado?.uuid === mov.uuid && movimientoSeleccionado?.id_caja_contexto === mov.id_caja_contexto" [ngClass]="movimientoClase(mov)" (click)="seleccionarMovimiento(mov)">
+                <span class="movement-icon"><mat-icon>{{ movimientoIcono(mov) }}</mat-icon></span>
+                <span class="movement-title"><span class="movement-title-line"><strong>{{ movimientoTitulo(mov) }}</strong><span class="estado-badge" [ngClass]="movimientoEstadoClase(mov)">{{ movimientoEstado(mov) }}</span>@if (etiquetaEnvioBoveda(mov); as etiqueta) { <span class="vault-route-badge" [class.external]="esTraspasoEntreAgencias(mov)">{{ etiqueta }}</span> }</span><small>{{ mov.created_at | date:'dd/MM/yyyy HH:mm' }}@if (mov.num_caja_contexto) { · Caja {{ mov.num_caja_contexto }} } · {{ mov.moneda }} · {{ movimientoSubtitulo(mov) }}</small></span>
+                <strong class="movement-amount" [class.negative]="movimientoImpacto(mov) < 0" [class.neutral]="movimientoImpacto(mov) === 0">{{ movimientoImpacto(mov) > 0 ? '+' : movimientoImpacto(mov) < 0 ? '−' : '' }}{{ mov.monto | number:'1.2-2' }} {{ mov.moneda }}</strong>
+                <mat-icon class="row-chevron">chevron_right</mat-icon>
+              </button>
+            }
+          </div>
+        }
+      </section>
+      <div class="loading" *ngIf="loading"><mat-icon class="spin">progress_activity</mat-icon>Cargando cajas…</div>
+    </div>
+  </mat-drawer-content>
+
+  <mat-drawer class="cash-side-panel" position="end" mode="over" [opened]="panelDerechoAbierto" (openedChange)="onDrawerOpenedChange($event)" (closedStart)="cerrarPanel()">
+    <header class="drawer-head" [ngClass]="selectedOp ? 'operation-' + selectedOp : movimientoSeleccionado ? 'operation-' + movimientoSeleccionado.tipo_operacion : ''">
+      <span class="drawer-head-icon"><mat-icon>{{ selectedOpConfig?.icon || (movimientoSeleccionado ? movimientoIcono(movimientoSeleccionado) : 'payments') }}</mat-icon></span>
+      <div class="drawer-head-copy"><h2>{{ selectedOpConfig?.label || (movimientoSeleccionado ? movimientoTitulo(movimientoSeleccionado) : 'Nuevo movimiento') }}</h2><p>{{ selectedOp ? selectedOpConfig?.desc : movimientoSeleccionado ? (movimientoSeleccionado.created_at | date:'dd/MM/yyyy HH:mm') : 'Elige el tipo de operación que deseas registrar.' }}</p></div>
+      @if (movimientoSeleccionado && !creatingMovement) { <span class="status-pill" [ngClass]="movimientoEstadoClase(movimientoSeleccionado)">{{ movimientoEstado(movimientoSeleccionado) }}</span> }
+      @if (selectedOp && vista !== 'cajero') { <button mat-icon-button type="button" (click)="volverOperaciones()" aria-label="Volver a operaciones"><mat-icon>arrow_back</mat-icon></button> }
+      <button mat-icon-button type="button" (click)="cerrarPanel()" aria-label="Cerrar panel"><mat-icon>close</mat-icon></button>
+    </header>
+
+    <div class="drawer-body">
+      @if (creatingMovement || selectedOp) {
+        <section class="drawer-cash-context">
+          <div class="context-picker">
+            <div class="context-picker-label"><mat-icon>point_of_sale</mat-icon><div><strong>Caja de trabajo</strong><small>Selecciona la caja abierta</small></div></div>
+            <app-searchable-select class="caja-field" [items]="cajasAbiertasOpc" valueKey="id" labelKey="label" placeholder="Buscar caja…" [(ngModel)]="selectedCajaId" (selectionChange)="onCajaChange()"></app-searchable-select>
+          </div>
+          @if (selectedCaja) {
+            <div class="cash-balance"><span class="balance-icon"><mat-icon>account_balance_wallet</mat-icon></span><span class="balance-copy"><small>Saldo actual · Caja {{ selectedCaja.num_caja }}</small><strong>{{ selectedCaja.saldo_actual | number:'1.2-2' }} <small>{{ selectedCaja.moneda }}</small></strong></span></div>
+          } @else {
+            <div class="cash-balance cash-balance-empty"><mat-icon>info</mat-icon><span>Elige una caja para continuar</span></div>
+          }
+        </section>
+      }
+
+      @if (creatingMovement && !selectedOp) {
+        @if (selectedCaja) {
+          <div class="drawer-intro"><strong>{{ vista === 'cajero' ? 'Registrar un traspaso' : '¿Qué operación de bóveda deseas realizar?' }}</strong><span>Elige una opción para continuar con Caja {{ selectedCaja.num_caja }} · {{ selectedCaja.moneda }}.</span></div>
+          <div class="operation-options">
+          @for (op of operacionesVista; track op.key) {
+            <button type="button" class="operation-option" [style.--operation-color]="op.color" (click)="selectOp(op.key)">
+              <span class="operation-option-icon"><mat-icon>{{ op.icon }}</mat-icon></span><span><strong>{{ op.label }}</strong><small>{{ op.desc }}</small></span><mat-icon class="option-arrow">chevron_right</mat-icon>
+            </button>
+          }
+          </div>
+        } @else {
+          <div class="drawer-select-hint"><mat-icon>touch_app</mat-icon><span>Selecciona una caja arriba para ver las operaciones disponibles.</span></div>
+        }
+      }
+
+      @if (selectedOp) {
+        @if (flujo; as route) {
+          <div class="cash-flow">
+            <div class="flow-node origin"><span class="flow-icon"><mat-icon>{{ route.origenTipo === 'caja' ? 'point_of_sale' : 'savings' }}</mat-icon></span><span><small>Origen</small><strong>{{ route.origenNombre }}</strong></span></div>
+            <mat-icon class="flow-arrow">arrow_forward</mat-icon>
+            <div class="flow-node destination"><span class="flow-icon"><mat-icon>{{ route.destinoTipo === 'caja' ? 'point_of_sale' : 'savings' }}</mat-icon></span><span><small>Destino</small><strong>{{ route.destinoNombre }}</strong></span></div>
+          </div>
+        }
+        @if (selectedOp === 'traspaso_cajero') {
+          <div class="form-field"><label>Caja destino</label><app-searchable-select [items]="cajasDestinoOpc" valueKey="id" labelKey="label" placeholder="Buscar cajero…" [(ngModel)]="form.idCajaDestino"></app-searchable-select>@if (!cajasDestino.length) { <small class="field-hint">No hay otras cajas abiertas con la misma moneda.</small> }</div>
+        }
+        @if (selectedOp === 'transferencia_caja_agencia') {
+          <div class="form-field"><label>Bóveda destino</label><div class="vault-destination-control"><app-searchable-select [items]="bovedasDestinoOpc" valueKey="id" labelKey="label" placeholder="Buscar bóveda destino…" [(ngModel)]="form.idBovedaDestino"></app-searchable-select>@if (tipoEnvioBovedaSeleccionada; as tipoEnvio) { <span class="vault-route-badge" [class.external]="tipoEnvio === 'Traspaso entre agencias'">{{ tipoEnvio }}</span> }</div>@if (!bovedasDestinoOpc.length) { <small class="field-hint">No hay bóvedas activas para {{ selectedCaja?.moneda }}.</small> }</div>
+        }
+        <div class="form-fields-row">
+          <div class="form-field"><label>{{ selectedOp === 'solicitud_fondos' ? 'Monto a solicitar' : selectedOp === 'transferencia_caja_agencia' ? 'Monto a enviar a bóveda' : 'Monto' }} <span>{{ selectedCaja?.moneda }}</span></label><input class="cash-input" type="number" [(ngModel)]="form.monto" min="0.01" step="0.01" placeholder="0.00"></div>
+          <div class="form-field"><label>Concepto <span>· opcional</span></label><textarea class="cash-input" [(ngModel)]="form.concepto" rows="1" maxlength="250" [placeholder]="selectedOp === 'solicitud_fondos' ? 'Motivo de la solicitud' : 'Motivo del movimiento'"></textarea></div>
+        </div>
+        @if (selectedCaja) {
+          <app-denomination-capture [idMoneda]="selectedCaja.id_moneda" [moneda]="selectedCaja.moneda" [montoEsperado]="montoEsperadoCortes" [titulo]="selectedOp === 'solicitud_fondos' ? 'Billetes y monedas recibidos' : selectedOp === 'traspaso_cajero' ? 'Billetes y monedas traspasados' : 'Billetes y monedas enviados'" [resetKey]="selectedOp + ':' + selectedCajaId" (cortesChange)="onCortesChange($event)" (totalChange)="onTotalCortesChange($event)"></app-denomination-capture>
+        }
+      }
+
+      @if (!creatingMovement && !selectedOp && movimientoSeleccionado; as mov) {
+        <div class="detail-amount" [class.negative]="movimientoImpacto(mov) < 0" [class.neutral]="movimientoImpacto(mov) === 0"><span>Monto {{ movimientoImpacto(mov) === 0 ? 'transferido' : 'del movimiento' }}</span><strong>{{ movimientoImpacto(mov) > 0 ? '+' : movimientoImpacto(mov) < 0 ? '−' : '' }}{{ mov.monto | number:'1.2-2' }} {{ mov.moneda }}</strong></div>
+        @if (esTransferenciaInterna(mov)) {
+          <div class="detail-route">
+            <section class="route-card origin"><span class="route-icon"><mat-icon>{{ mov.tipo_operacion === 'transferencia_boveda' || mov.tipo_operacion === 'solicitud_fondos' ? 'savings' : 'point_of_sale' }}</mat-icon></span><div><small>Origen</small><strong>{{ movimientoOrigen(mov) }}</strong></div></section>
+            <mat-icon class="route-arrow">arrow_forward</mat-icon>
+            <section class="route-card destination"><span class="route-icon"><mat-icon>{{ mov.tipo_operacion === 'traspaso_cajero' || mov.tipo_operacion === 'solicitud_fondos' ? 'point_of_sale' : 'savings' }}</mat-icon></span><div><small>Destino</small><strong>{{ movimientoDestino(mov) }}</strong>@if (mov.tipo_operacion === 'solicitud_fondos') { <em class="vault-route-badge">Fondos recibidos</em> } @else { @if (etiquetaEnvioBoveda(mov); as etiqueta) { <em class="vault-route-badge" [class.external]="esTraspasoEntreAgencias(mov)">{{ etiqueta }}</em> } }</div></section>
+          </div>
+        }
+        <div class="detail-rows">
+          <div class="detail-row"><mat-icon>receipt_long</mat-icon><div><small>Operación</small><strong>{{ movimientoTitulo(mov) }}</strong></div></div>
+          @if (mov.metadata.concepto || mov.metadata.glosa) { <div class="detail-row"><mat-icon>notes</mat-icon><div><small>Concepto</small><strong>{{ mov.metadata.concepto || mov.metadata.glosa }}</strong></div></div> }
+          @if (mov.metadata.numero_comprobante) { <div class="detail-row"><mat-icon>tag</mat-icon><div><small>Comprobante</small><strong>#{{ mov.metadata.numero_comprobante }}</strong></div></div> }
+          @if (mov.metadata.tipo_transaccion) { <div class="detail-row"><mat-icon>account_balance</mat-icon><div><small>Tipo bancario</small><strong>{{ movimientoTipoBancario(mov.metadata.tipo_transaccion) }}</strong></div></div> }
+          <div class="detail-row"><mat-icon>schedule</mat-icon><div><small>Fecha y hora</small><strong>{{ mov.created_at | date:'dd/MM/yyyy HH:mm:ss' }}</strong></div></div>
+          <div class="detail-row uuid-row"><mat-icon>fingerprint</mat-icon><div><small>Identificador</small><code>{{ mov.uuid }}</code></div></div>
+        </div>
+      }
+    </div>
+
+    @if (selectedOp) { <footer class="drawer-footer"><button mat-stroked-button type="button" (click)="cancelarRegistro()">Cancelar</button><button mat-flat-button color="primary" type="button" (click)="ejecutar()" [disabled]="submitting || !puedeEjecutar">{{ submitting ? 'Procesando…' : 'Registrar movimiento' }}</button></footer> }
+  </mat-drawer>
+</mat-drawer-container>

@@ -1,0 +1,165 @@
+.cheque-page-head { margin-bottom:14px; }
+.cheque-page-head .b-head-icon { color:#174f91; background:#dcecff; border:1px solid #b9d6fb; }
+.cheque-page-drawer { display:block; position:relative; width:100%; height:calc(100dvh - 124px); min-height:420px; overflow:hidden; background:transparent; }
+.cheque-page-drawer .bank-page-content { display:block; width:100%; height:100%; min-height:0; overflow:auto; box-sizing:border-box; background:transparent; }
+.cheque-page-head .b-head-text span { color:var(--text-muted); }
+.cheque-tabs { margin-bottom:14px; }
+.tab-count { display:inline-grid; place-items:center; min-width:19px; height:19px; padding:0 5px; border-radius:999px; color:var(--text-muted); background:var(--border-light); font-size:10px; font-weight:700; box-sizing:border-box; }
+.cheque-tabs button.active .tab-count { color:#174f91; background:#dcecff; }
+.cheque-lifecycle { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin:0 0 16px; padding:11px 14px; border:1px solid var(--info-border,#bfdbfe); border-radius:12px; background:var(--info-bg,#eff6ff); }
+.cheque-lifecycle > mat-icon { flex:none; color:#2563a6; }
+.cheque-lifecycle > strong { margin-right:3px; color:var(--text-primary); font-size:12px; }
+.lifecycle-arrow { color:var(--text-muted); }
+.cheque-card { overflow:hidden; }
+.cheque-filters { display:grid; grid-template-columns:minmax(220px,1fr) minmax(170px,.5fr); align-items:center; gap:12px; padding:14px 16px; margin:0 0 14px; border:1px solid #e2e8f0; border-radius:14px; background:linear-gradient(115deg,#f8fafc 0%,#f4f7fb 100%); box-shadow:0 2px 8px rgba(25,45,75,.035); }
+.cheque-filters.single { grid-template-columns:minmax(220px,1fr); }
+.cheque-filters mat-form-field { width:100%; }
+.cheque-filters mat-form-field ::ng-deep .mat-mdc-form-field-subscript-wrapper { display:none; }
+.cheque-filters mat-form-field ::ng-deep .mat-mdc-text-field-wrapper { border-radius:10px; background:#fff; }
+.cheque-filters mat-form-field ::ng-deep .mdc-notched-outline__leading,
+.cheque-filters mat-form-field ::ng-deep .mdc-notched-outline__notch,
+.cheque-filters mat-form-field ::ng-deep .mdc-notched-outline__trailing { border-color:#d6dfeb!important; }
+.cheque-filters mat-form-field:hover ::ng-deep .mdc-notched-outline__leading,
+.cheque-filters mat-form-field:hover ::ng-deep .mdc-notched-outline__notch,
+.cheque-filters mat-form-field:hover ::ng-deep .mdc-notched-outline__trailing { border-color:#aebed1!important; }
+.cheque-filters mat-form-field.mat-focused ::ng-deep .mdc-notched-outline__leading,
+.cheque-filters mat-form-field.mat-focused ::ng-deep .mdc-notched-outline__notch,
+.cheque-filters mat-form-field.mat-focused ::ng-deep .mdc-notched-outline__trailing { border-color:#3977bd!important; border-width:2px!important; }
+.cheque-filters mat-form-field ::ng-deep .mat-mdc-form-field-flex { align-items:center; }
+.cheque-filters mat-form-field ::ng-deep .mat-mdc-form-field-infix { display:flex; align-items:center; box-sizing:border-box; min-height:48px; padding-top:0!important; padding-bottom:0!important; }
+.cheque-filters mat-form-field ::ng-deep .mat-mdc-form-field-icon-prefix { color:#2865a6; }
+.cheque-filters mat-form-field ::ng-deep .mdc-floating-label { color:#64748b; font-size:12px; }
+.cheque-filters mat-form-field.mat-focused ::ng-deep .mdc-floating-label { color:#2865a6; }
+.cheque-filters mat-form-field ::ng-deep input,
+.cheque-filters mat-form-field ::ng-deep .mat-mdc-select-value { color:#172b4d; font-size:13px; font-weight:500; }
+.cheque-filters mat-form-field ::ng-deep input::placeholder { color:#8b9bb0; opacity:1; }
+.cheque-card > .b-note { margin:0 0 14px; }
+.cheque-step-card { border-top:3px solid #dbeafe; }
+.cheque-send-card { border-top-color:#d1fae5; }
+.cheque-step-card .b-form-actions { justify-content:flex-end; }
+.cheque-card .b-table-wrap { border:1px solid var(--border-light); }
+.cheque-card .b-table tbody tr { transition:background .15s ease; }
+.cheque-card .b-table tbody tr:hover { background:var(--hover-bg); }
+.cheque-card .b-table td { vertical-align:middle; }
+.cheque-card .b-table td.b-nowrap .b-btn { margin:2px; }
+.cheque-card .b-card-head .b-btn mat-icon { width:17px; height:17px; font-size:17px; }
+.cheque-card .b-badge { white-space:nowrap; }
+.cheque-list-row { cursor:pointer; }
+.cheque-list-row.selected { background:#f0f6ff; }
+.cheque-list-row:focus-visible { outline:2px solid var(--gambarte-orange); outline-offset:-2px; }
+.cheque-muted-line { display:block; margin-top:3px; color:var(--text-muted); font-size:11px; }
+.currency-pill { display:inline-flex; padding:3px 8px; border-radius:999px; color:#174f91; background:#edf5ff; font-size:11px; font-weight:700; }
+.available-count { display:inline-grid; place-items:center; min-width:30px; height:28px; padding:0 7px; border-radius:8px; color:#17643e; background:#e1f5e9; }
+.concept-cell { max-width:240px; overflow:hidden; color:var(--text-secondary); text-overflow:ellipsis; white-space:nowrap; }
+.cheque-amount { white-space:nowrap; font-variant-numeric:tabular-nums; }
+.row-chevron { width:18px; color:var(--text-muted); font-size:19px; }
+.cheque-page-drawer .bank-side-drawer { position:fixed!important; z-index:1001; top:56px; right:0; bottom:0; width:min(760px,50vw); height:auto!important; margin:0; border-radius:0; border-left:1px solid var(--border,#e2e8f0); background:var(--card-bg,#fff); box-shadow:-14px 0 40px rgba(15,23,42,.16); }
+:host ::ng-deep mat-drawer.bank-side-drawer { min-width:0; max-width:100%; }
+:host ::ng-deep mat-drawer.bank-side-drawer .mat-drawer-inner-container { display:flex; flex-direction:column; overflow-x:hidden; }
+:host ::ng-deep .cheque-page-drawer .mat-drawer-backdrop.mat-drawer-shown { position:fixed; inset:0; background:rgba(15,23,42,.28)!important; opacity:1!important; }
+.bank-drawer-head { display:flex; align-items:center; gap:12px; min-height:78px; padding:14px 20px; border-bottom:1px solid var(--border-light); }
+.bank-drawer-head.cheque-head { border-left:4px solid #4d8bd2; background:linear-gradient(105deg,#edf5ff,#f7faff 64%,#fff); }
+.bank-drawer-head.receive-head { border-left:4px solid #1b9a71; background:linear-gradient(105deg,#eaf8f1,#f6fcf8 64%,#fff); }
+.bank-drawer-icon { display:grid; place-items:center; width:42px; height:42px; flex:0 0 42px; border:1px solid #b9d6fb; border-radius:12px; color:#174f91; background:#dcecff; box-shadow:0 2px 5px rgba(37,99,166,.12); }
+.receive-head .bank-drawer-icon { color:#08734f; border-color:#a9dfc1; background:#d6f2e3; box-shadow:0 2px 5px rgba(22,138,98,.12); }
+.bank-drawer-copy { flex:1; min-width:0; }
+.bank-drawer-copy h3 { margin:0; color:var(--text-primary); font-size:16px; font-weight:700; }
+.bank-drawer-copy p { margin:4px 0 0; color:var(--text-muted); font-size:11px; }
+.bank-drawer-head .b-badge { flex:none; }
+.cheque-page-drawer .bank-drawer-body { flex:1; min-height:0; overflow:auto; padding:18px 20px 24px; }
+.cheque-page-drawer .bank-drawer-footer { display:flex; justify-content:flex-end; gap:9px; flex-wrap:wrap; padding:13px 20px; border-top:1px solid var(--border-light); background:var(--card-bg); }
+.cheque-page-drawer .bank-drawer-footer .b-btn { min-height:38px; }
+@media(max-width:600px) { .cheque-filters { grid-template-columns:1fr; padding:10px; } }
+.cheque-detail-amount { display:flex; align-items:center; justify-content:space-between; gap:10px; min-height:62px; margin-bottom:14px; padding:14px 17px; border:1px solid #d5e6fb; border-radius:12px; background:#f4f8ff; }
+.cheque-detail-amount span { color:var(--text-muted); font-size:12px; }
+.cheque-detail-amount strong { color:#174f91; font-size:20px; font-variant-numeric:tabular-nums; }
+.cheque-detail-list { display:grid; }
+.cheque-detail-row { display:grid; grid-template-columns:24px minmax(0,1fr); gap:12px; padding:14px 4px; border-bottom:1px solid var(--border-light); }
+.cheque-detail-row > mat-icon { color:#8798ad; font-size:19px; }
+.cheque-detail-row > div { display:grid; gap:5px; min-width:0; }
+.cheque-detail-row span { color:var(--text-muted); font-size:11px; }
+.cheque-detail-row strong { color:var(--text-primary); font-size:13px; overflow-wrap:anywhere; }
+.cheque-heatmap { margin-top:20px; padding:15px; border:1px solid var(--border-light); border-radius:13px; background:var(--card-bg); }
+.cheque-heatmap-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
+.cheque-heatmap-head > div { display:grid; gap:4px; }
+.cheque-heatmap-head h4 { margin:0; color:var(--text-primary); font-size:14px; }
+.cheque-heatmap-head span { color:var(--text-muted); font-size:11px; }
+.cheque-heatmap-total { flex:none; padding:5px 9px; border-radius:999px; color:#174f91!important; background:#edf5ff; font-weight:700; }
+.cheque-heatmap-legend { display:flex; flex-wrap:wrap; gap:8px 13px; margin-bottom:13px; }
+.cheque-heatmap-legend > span { display:inline-flex; align-items:center; gap:5px; color:var(--text-secondary); font-size:10px; }
+.heatmap-dot { width:9px; height:9px; border-radius:3px; background:#0bb3a6; }
+.heatmap-dot.issued { background:#8b9bb0; }
+.heatmap-dot.sent { background:#ef9b27; }
+.heatmap-dot.received { background:#4387d6; }
+.heatmap-dot.paid { background:#249969; }
+.heatmap-dot.voided { background:#e74450; }
+.cheque-heatmap-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(43px,1fr)); gap:5px; max-height:310px; overflow:auto; padding:2px 3px 4px 1px; }
+.heatmap-cell { display:grid; place-items:center; min-width:0; min-height:27px; padding:2px 4px; border:1px solid transparent; border-radius:6px; color:#fff; font-size:10px; line-height:1; font-weight:700; font-variant-numeric:tabular-nums; text-decoration:underline; text-underline-offset:2px; }
+button.heatmap-cell { cursor:pointer; transition:transform .12s ease,box-shadow .12s ease; }
+button.heatmap-cell:hover { z-index:1; transform:translateY(-1px) scale(1.06); box-shadow:0 3px 8px #0f172a2b; }
+button.heatmap-cell:focus-visible { outline:2px solid #174f91; outline-offset:2px; }
+.heatmap-cell.status-I { color:#fff; background:#0bb3a6; }
+.heatmap-cell.status-A { color:#fff; background:#8797aa; }
+.heatmap-cell.status-E { color:#fff; background:#e99a22; }
+.heatmap-cell.status-T { color:#fff; background:#4387d6; }
+.heatmap-cell.status-C { color:#fff; background:#249969; }
+.heatmap-cell.status-N { color:#fff; background:#e74450; }
+.cheque-heatmap-message { display:flex; align-items:center; justify-content:center; gap:8px; min-height:90px; color:var(--text-muted); font-size:12px; }
+.cheque-heatmap-message mat-icon { width:18px; height:18px; font-size:18px; }
+.heatmap-spinner { animation:heatmap-spin 1s linear infinite; color:#4387d6; }
+.heatmap-error { color:#b4232f; }
+@keyframes heatmap-spin { to { transform:rotate(360deg); } }
+.cheque-attachments { margin-top:18px; }
+.cheque-attachments h4 { margin:0 0 10px; color:var(--text-primary); font-size:13px; }
+.attachment-cards { display:grid; gap:8px; }
+.attachment-card { display:grid; grid-template-columns:28px minmax(0,1fr) auto auto; align-items:center; gap:9px; padding:10px; border:1px solid var(--border-light); border-radius:10px; background:var(--card-bg); }
+.attachment-card > mat-icon { color:#5276a8; }
+.attachment-card > div { display:grid; gap:3px; min-width:0; }
+.attachment-card strong { color:var(--text-primary); font-size:12px; }
+.attachment-card small { overflow:hidden; color:var(--text-muted); font-size:10px; text-overflow:ellipsis; white-space:nowrap; }
+.cheque-form-body { display:grid; align-content:start; gap:16px; }
+.cheque-form-section { padding:15px; border:1px solid var(--border-light); border-radius:12px; background:var(--card-bg); }
+.cheque-map-launch { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:8px 0 13px; }
+.cheque-map-launch > span { color:var(--text-muted); font-size:11px; }
+.cheque-map-launch .b-btn { flex:none; }
+.cheque-map-launch .b-btn mat-icon { width:16px; height:16px; font-size:16px; }
+.cheque-map-dialog-backdrop { position:fixed; inset:0; z-index:1200; display:grid; place-items:center; padding:20px; background:rgba(15,23,42,.48); }
+.cheque-map-dialog { display:flex; flex-direction:column; width:min(850px,96vw); max-height:min(760px,90vh); overflow:hidden; border:1px solid var(--border-light); border-radius:16px; background:var(--card-bg,#fff); box-shadow:0 24px 80px rgba(15,23,42,.28); }
+.cheque-map-dialog-head { display:flex; align-items:center; gap:12px; padding:16px 20px; border-bottom:1px solid var(--border-light); background:linear-gradient(105deg,#edf5ff,#fff 72%); }
+.cheque-map-dialog-head > div { flex:1; min-width:0; }
+.cheque-map-dialog-head h3 { margin:0; color:var(--text-primary); font-size:16px; }
+.cheque-map-dialog-head p { margin:4px 0 0; color:var(--text-muted); font-size:11px; }
+.cheque-map-dialog-content { min-height:0; overflow:auto; padding:18px 20px; }
+.dialog-heatmap-grid { grid-template-columns:repeat(auto-fill,minmax(46px,1fr)); max-height:55vh; }
+.dialog-heatmap-grid .heatmap-cell { min-height:31px; }
+.dialog-heatmap-grid .heatmap-cell.is-current { outline:2px solid #14213d; outline-offset:2px; }
+.cheque-map-dialog-footer { display:flex; justify-content:flex-end; padding:12px 20px; border-top:1px solid var(--border-light); background:var(--card-bg); }
+.cheque-section-title { display:flex; align-items:center; gap:10px; padding-bottom:12px; margin-bottom:8px; border-bottom:1px solid var(--border-light); }
+.cheque-section-title > span { display:grid; place-items:center; width:30px; height:30px; border-radius:9px; color:#174f91; background:#edf5ff; font-size:11px; font-weight:800; }
+.cheque-section-title > div { display:grid; gap:3px; }
+.cheque-section-title strong { color:var(--text-primary); font-size:13px; }
+.cheque-section-title small { color:var(--text-muted); font-size:11px; }
+.cheque-send-intro { display:flex; align-items:center; gap:11px; padding:13px; border:1px solid #d5e6fb; border-radius:11px; color:#174f91; background:#f4f8ff; }
+.cheque-send-intro > mat-icon { flex:none; }
+.cheque-send-intro div { display:grid; gap:4px; }
+.cheque-send-intro strong { font-size:13px; }
+.cheque-send-intro span { color:var(--text-muted); font-size:11px; }
+@media(max-width:700px) {
+  .cheque-page-head { align-items:flex-start; }
+  .cheque-page-head .b-head-text span { display:block; line-height:1.5; }
+  .cheque-lifecycle { align-items:flex-start; }
+  .cheque-card { padding:14px; }
+  .cheque-page-drawer { height:calc(100dvh - 86px); min-height:360px; }
+  .cheque-page-drawer .bank-side-drawer { top:56px; width:min(92vw,520px); }
+  .cheque-page-drawer .bank-drawer-head,.cheque-page-drawer .bank-drawer-body { padding-left:14px; padding-right:14px; }
+  .cheque-page-drawer .bank-drawer-footer { padding-left:14px; padding-right:14px; }
+  .attachment-card { grid-template-columns:24px minmax(0,1fr) auto; }
+  .attachment-card .b-btn:last-child { grid-column:2/4; justify-self:end; }
+  .cheque-heatmap { padding:12px; }
+  .cheque-heatmap-grid { grid-template-columns:repeat(auto-fill,minmax(38px,1fr)); gap:4px; }
+  .cheque-map-launch { align-items:flex-start; flex-direction:column; }
+  .cheque-map-dialog-backdrop { padding:10px; }
+  .cheque-map-dialog { width:100%; max-height:92vh; }
+  .cheque-map-dialog-head,.cheque-map-dialog-content { padding-left:14px; padding-right:14px; }
+  .cheque-map-dialog-footer { padding-left:14px; padding-right:14px; }
+}

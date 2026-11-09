@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="3" stdDeviation="8" flood-color="#12243b" flood-opacity=".08"/></filter>
+    <style>
+      text{font-family:Arial,Helvetica,sans-serif;fill:#172d4b}.muted{fill:#7e90aa}.tiny{font-size:11px}.small{font-size:13px}.body{font-size:14px}.bold{font-weight:700}.heavy{font-weight:800}.orange{fill:#bf5e12}.blue{fill:#2467b3}
+    </style>
+  </defs>
+  <rect width="1440" height="900" fill="#f7f9fc"/>
+  <rect x="0" y="0" width="1440" height="58" fill="#fff"/>
+  <path d="M0 57.5H1440" stroke="#e2e9f1"/>
+  <text x="30" y="36" font-size="17" fill="#c26118" font-weight="800">GAMBARTe</text>
+  <text x="180" y="36" class="small muted">Centro de ayuda</text>
+  <rect x="1085" y="14" width="260" height="31" rx="7" fill="#f8fafc" stroke="#dce5ef"/>
+  <text x="1100" y="34" class="small muted">⌕　Buscar en los manuales...</text>
+
+  <!-- Pinned navigation column; only this column gets its own scroll when the catalog grows. -->
+  <rect x="22" y="78" width="314" height="796" rx="13" fill="#fff" stroke="#dce5ef" filter="url(#shadow)"/>
+  <text x="43" y="112" font-size="16" class="heavy">Manuales disponibles</text>
+  <rect x="289" y="91" width="27" height="23" rx="12" fill="#edf3f9"/><text x="302.5" y="107" text-anchor="middle" class="tiny bold muted">20</text>
+  <path d="M39 130H319" stroke="#e9eef4"/>
+  <text x="47" y="158" class="tiny heavy muted">ÍNDICE · 5 SECCIONES</text>
+  <rect x="39" y="172" width="280" height="34" rx="7" fill="#f4f7fa"/>
+  <text x="52" y="194" class="small bold">▣　PUNTO DE VENTA</text><text x="300" y="194" class="small muted">⌄</text>
+  <text x="57" y="231" class="tiny muted">01</text><text x="89" y="232" class="small bold">Apertura de caja</text><text x="89" y="248" class="tiny muted">Inicio de jornada</text>
+  <text x="57" y="275" class="tiny muted">02</text><text x="89" y="276" class="small">Cierre de caja</text><text x="89" y="292" class="tiny muted">Fin de jornada</text>
+  <rect x="39" y="307" width="280" height="34" rx="7" fill="#f4f7fa"/><text x="52" y="329" class="small bold">⇄　CAMBIOS</text><text x="300" y="329" class="small muted">⌄</text>
+  <text x="57" y="366" class="tiny muted">03</text><text x="89" y="367" class="small">Compra de moneda</text>
+  <text x="57" y="402" class="tiny muted">04</text><text x="89" y="403" class="small">Venta de moneda</text>
+  <text x="57" y="438" class="tiny muted">05</text><text x="89" y="439" class="small">Reportes de cambio</text>
+  <rect x="39" y="455" width="280" height="34" rx="7" fill="#f4f7fa"/><text x="52" y="477" class="small bold">◎　GIRO INTERNACIONAL</text><text x="300" y="477" class="small muted">⌄</text>
+  <text x="57" y="514" class="tiny muted">06</text><text x="89" y="515" class="small">Enviar giro</text>
+  <text x="57" y="550" class="tiny muted">07</text><text x="89" y="551" class="small">Reportes de giros</text>
+  <rect x="39" y="567" width="280" height="34" rx="7" fill="#f4f7fa"/><text x="52" y="589" class="small bold">▣　GESTIÓN DE EFECTIVO</text><text x="300" y="589" class="small muted">⌄</text>
+  <text x="57" y="626" class="tiny muted">08</text><text x="89" y="627" class="small">Traspaso a cajero</text>
+  <text x="57" y="662" class="tiny muted">09</text><text x="89" y="663" class="small">Operaciones de bóveda</text>
+  <rect x="39" y="679" width="280" height="34" rx="7" fill="#fff1e4" stroke="#f3d3b4"/><text x="52" y="701" class="small bold orange">⌂　BANCOS</text><text x="300" y="701" class="small orange">⌃</text>
+  <rect x="47" y="720" width="264" height="38" rx="7" fill="#fff8f1" stroke="#f4a052"/><text x="59" y="744" class="tiny bold orange">10　 Cuentas y banca</text><text x="294" y="744" class="body orange">›</text>
+  <text x="59" y="783" class="tiny muted">11　 Traspasos bancarios</text>
+  <text x="59" y="811" class="tiny muted">12　 Depósitos y retiros</text>
+  <rect x="39" y="832" width="280" height="26" rx="6" fill="#f8fafc"/><text x="52" y="850" class="tiny muted">Lista desplazable · más manuales debajo ↓</text>
+
+  <!-- Manual is the only main region that scrolls. -->
+  <rect x="357" y="78" width="1061" height="796" rx="13" fill="#fff" stroke="#dce5ef" filter="url(#shadow)"/>
+  <rect x="358" y="79" width="1059" height="99" rx="12" fill="#fff"/>
+  <text x="390" y="108" class="tiny heavy orange" letter-spacing="1">BANCOS · GUÍA PASO A PASO</text>
+  <text x="390" y="143" font-size="26" class="heavy">Cuentas bancarias</text>
+  <text x="390" y="165" class="small muted">Consulta saldos, revisa cuentas y abre el detalle de movimientos.</text>
+  <path d="M380 187H1395" stroke="#e8edf4"/>
+  <rect x="1370" y="112" width="24" height="24" rx="12" fill="#edf4ff"/><text x="1382" y="129" text-anchor="middle" class="tiny blue">↓</text>
+
+  <text x="390" y="222" class="tiny muted">DESPLAZA ESTA ÁREA PARA AVANZAR POR LOS PASOS</text>
+  <rect x="390" y="240" width="995" height="76" rx="10" fill="#fff8f1" stroke="#f2d2b2"/>
+  <text x="410" y="267" class="small bold orange">Antes de empezar</text>
+  <text x="410" y="290" class="small muted">Verifica la agencia activa y elige banco, moneda o número de cuenta para filtrar.</text>
+
+  <rect x="390" y="335" width="995" height="465" rx="10" fill="#fff" stroke="#dce5ef"/>
+  <rect x="408" y="354" width="33" height="33" rx="9" fill="#fff0e1"/><text x="424" y="376" text-anchor="middle" class="tiny heavy orange">01</text>
+  <text x="453" y="371" font-size="16" class="bold">Filtra las cuentas</text>
+  <text x="453" y="391" class="small muted">Usa los controles de la pantalla para encontrar la cuenta que necesitas.</text>
+  <rect x="420" y="414" width="935" height="351" rx="9" fill="#f9fbfd" stroke="#e1e8f0"/>
+  <rect x="438" y="432" width="899" height="43" rx="7" fill="#fff" stroke="#d8e2ed"/>
+  <rect x="450" y="440" width="184" height="27" rx="5" fill="#fffaf5" stroke="#f3a04d"/><text x="462" y="458" class="tiny orange">Banco　⌄</text>
+  <rect x="645" y="440" width="184" height="27" rx="5" fill="#fff" stroke="#d8e2ed"/><text x="657" y="458" class="tiny muted">Moneda　⌄</text>
+  <rect x="840" y="440" width="213" height="27" rx="5" fill="#fff" stroke="#d8e2ed"/><text x="852" y="458" class="tiny muted">⌕　Número de cuenta</text>
+  <rect x="450" y="486" width="184" height="32" rx="6" fill="#fff8f1" stroke="#f3a04d"/><text x="542" y="506" text-anchor="middle" class="tiny bold orange">1 · Selecciona banco ↓</text>
+  <rect x="645" y="486" width="184" height="32" rx="6" fill="#fff" stroke="#d8e2ed"/><text x="737" y="506" text-anchor="middle" class="tiny muted">2 · Elige moneda</text>
+  <rect x="840" y="486" width="213" height="32" rx="6" fill="#fff" stroke="#d8e2ed"/><text x="946" y="506" text-anchor="middle" class="tiny muted">3 · Busca cuenta</text>
+  <path d="M542 485v-12m0 0-5 6m5-6 5 6" fill="none" stroke="#f58220" stroke-width="1.6"/>
+  <rect x="438" y="536" width="899" height="67" rx="7" fill="#fff" stroke="#e1e8f0"/>
+  <rect x="454" y="553" width="34" height="34" rx="7" fill="#fff0e1"/><text x="471" y="575" text-anchor="middle" class="tiny bold orange">B</text>
+  <text x="500" y="562" class="small bold">BANCO BISA · 6942240013</text><text x="500" y="583" class="tiny muted">AGENCIA 6 DE MARZO · BOB</text>
+  <rect x="1110" y="552" width="105" height="34" rx="7" fill="#edf4ff"/><text x="1162" y="574" text-anchor="middle" class="tiny bold blue">Movimientos</text>
+  <rect x="1224" y="552" width="96" height="34" rx="7" fill="#fff" stroke="#d8e2ed"/><text x="1272" y="574" text-anchor="middle" class="tiny bold">Abrir cuenta</text>
+  <text x="438" y="637" class="tiny muted">El índice queda fijo; se desplaza por separado si agregamos más guías.</text>
+  <text x="438" y="657" class="tiny muted">Este panel tiene su propio desplazamiento para que los pasos largos no muevan la navegación.</text>
+
+  <rect x="1389" y="190" width="5" height="640" rx="3" fill="#edf1f5"/><rect x="1389" y="199" width="5" height="180" rx="3" fill="#aebbd0"/>
+  <text x="390" y="843" class="tiny muted">Mockup conceptual · escritorio/tablet · navegación y contenido con scroll independiente</text>
+</svg>

@@ -1,0 +1,104 @@
+<mat-drawer-container class="bank-page-drawer" [hasBackdrop]="true">
+  <mat-drawer-content class="bank-page-content">
+    <header class="b-head deposit-page-head">
+      <div class="b-head-icon"><mat-icon>account_balance_wallet</mat-icon></div>
+      <div class="b-head-text"><h2>Depósitos y retiros</h2><span>Movimientos de efectivo entre caja y cuenta bancaria.</span></div>
+      <div class="b-head-actions"><a routerLink="/manuales/bancos" [queryParams]="{tipo:'depositos'}" class="bank-manual-help">? Manual</a><button class="b-btn b-btn-primary" type="button" (click)="abrirNuevo()"><mat-icon>add</mat-icon> Nueva operación</button></div>
+    </header>
+
+    @if (errorDeposito && drawerMode !== 'new') { <div class="b-alert err" role="alert">{{ errorDeposito }}</div> }
+
+    <section class="b-card deposit-history-card">
+      <div class="b-card-head">
+        <div><h3>Movimientos registrados</h3><span class="b-muted b-small">{{ depositosFiltrados.length }} de {{ depositos.length }} operación(es) · Depósitos y retiros de caja</span></div>
+        <button class="b-btn b-btn-outline b-btn-sm" type="button" (click)="loadDepositos()"><mat-icon>refresh</mat-icon> Actualizar</button>
+      </div>
+      <div class="deposit-filters">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-icon matPrefix>search</mat-icon><input matInput [(ngModel)]="filtroTexto" placeholder="Buscar movimiento"></mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Tipo</mat-label><mat-select [(ngModel)]="filtroTipo"><mat-option value="T">Depósitos y retiros</mat-option><mat-option value="D">Depósitos</mat-option><mat-option value="R">Retiros</mat-option></mat-select></mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Desde</mat-label><input matInput type="date" [(ngModel)]="filtroDesde"></mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Hasta</mat-label><input matInput type="date" [(ngModel)]="filtroHasta"></mat-form-field>
+      </div>
+      @if (!depositos.length) {
+        <div class="b-empty"><mat-icon>receipt_long</mat-icon><strong>Sin movimientos registrados</strong><span>Las operaciones de caja y banco aparecerán aquí.</span></div>
+      } @else if (!depositosFiltrados.length) {
+        <div class="b-empty"><mat-icon>search_off</mat-icon><strong>No hay movimientos con esos filtros</strong><span>Ajusta la búsqueda, el tipo o el período.</span></div>
+      } @else {
+        <div class="b-table-wrap"><table class="b-table">
+          <thead><tr><th>Fecha</th><th>Tipo</th><th>Caja</th><th>Entidad / cuenta</th><th class="b-r">Monto</th><th>Referencia</th><th class="b-c">Comprobante</th><th></th></tr></thead>
+          <tbody>
+            @for (d of depositosFiltrados; track d.id) {
+              <tr class="deposit-list-row" [class.is-withdrawal]="d.tipo === 'R'" [class.selected]="depositoSeleccionado?.id === d.id" tabindex="0" (click)="verDetalle(d)" (keydown.enter)="verDetalle(d)">
+                <td class="b-nowrap">{{ d.created_at | date:'dd/MM/yy HH:mm' }}</td>
+                <td><span class="operation-badge" [class.deposit-badge]="d.tipo === 'D'" [class.withdrawal-badge]="d.tipo === 'R'"><mat-icon>{{ d.tipo === 'D' ? 'south_west' : 'north_east' }}</mat-icon>{{ d.tipo === 'D' ? 'Depósito' : 'Retiro' }}</span></td>
+                <td>{{ d.num_caja ? 'Caja ' + d.num_caja : '—' }}</td>
+                <td><strong>{{ d.entidad }}</strong><small class="deposit-account-number">{{ d.num_cuenta }}</small></td>
+                <td class="b-r b-strong deposit-amount" [class.is-withdrawal]="d.tipo === 'R'">{{ d.monto | number:'1.2-2' }} {{ d.moneda }}</td>
+                <td class="b-muted">{{ d.referencia || '—' }}</td>
+                <td class="b-c"><mat-icon class="receipt-indicator" [class.has-receipt]="!!d.comprobante_path" [attr.aria-label]="d.comprobante_path ? 'Comprobante adjunto' : 'Sin comprobante'">{{ d.comprobante_path ? 'attach_file' : 'remove' }}</mat-icon></td>
+                <td><mat-icon class="row-chevron">chevron_right</mat-icon></td>
+              </tr>
+            }
+          </tbody>
+        </table></div>
+      }
+    </section>
+  </mat-drawer-content>
+
+  <mat-drawer class="bank-side-drawer" position="end" mode="over" [opened]="!!drawerMode" (openedChange)="onDrawerOpenedChange($event)" (closedStart)="cerrarDrawer()">
+    @if (drawerMode === 'new') {
+      <header class="bank-drawer-head" [class.deposit-head]="deposito.tipo === 'D'" [class.withdrawal-head]="deposito.tipo === 'R'">
+        <span class="bank-drawer-icon"><mat-icon>{{ deposito.tipo === 'D' ? 'south_west' : 'north_east' }}</mat-icon></span>
+        <div class="bank-drawer-copy"><h3>{{ deposito.tipo === 'D' ? 'Nuevo depósito' : 'Nuevo retiro' }}</h3><p>Registra el movimiento entre caja y banco.</p></div>
+        <button class="b-btn b-btn-ghost b-btn-xs" type="button" aria-label="Cerrar" (click)="cerrarDrawer()"><mat-icon>close</mat-icon></button>
+      </header>
+      <div class="bank-drawer-body deposit-form-card" [class.is-withdrawal]="deposito.tipo === 'R'">
+        @if (errorDeposito) { <div class="b-alert err" role="alert">{{ errorDeposito }}</div> }
+        <div class="b-grid2">
+          <div><label class="b-label">Tipo de operación</label><select class="b-input" [(ngModel)]="deposito.tipo" (ngModelChange)="onTipoChange()"><option value="D">Depósito (caja → banco)</option><option value="R">Retiro (banco → caja)</option></select></div>
+          <div><label class="b-label" for="caja-moneda-select">Caja / moneda</label><select id="caja-moneda-select" class="b-input" [(ngModel)]="deposito.idCaja" (ngModelChange)="onMonedaChange()"><option [ngValue]="0">Seleccionar caja…</option>@for (opcion of monedaOpciones; track opcion.id) { <option [ngValue]="opcion.id">{{ opcion.label }}</option> }</select></div>
+        </div>
+        <div class="deposit-flow" [class.is-withdrawal]="deposito.tipo === 'R'" aria-live="polite">
+          <div class="deposit-flow-node"><span class="deposit-flow-icon cash"><mat-icon>point_of_sale</mat-icon></span><span><strong>Caja</strong><small>{{ deposito.tipo === 'D' ? 'Sale efectivo' : 'Recibe efectivo' }}</small></span></div>
+          <mat-icon class="deposit-flow-arrow">arrow_forward</mat-icon>
+          <div class="deposit-flow-node"><span class="deposit-flow-icon bank"><mat-icon>account_balance</mat-icon></span><span><strong>Cuenta bancaria</strong><small>{{ deposito.tipo === 'D' ? 'Recibe el depósito' : 'Se debita el retiro' }}</small></span></div>
+        </div>
+        <div><label class="b-label" for="cuenta-bancaria-select">Cuenta bancaria</label><select id="cuenta-bancaria-select" class="b-input" [(ngModel)]="cuentaSelId"><option [ngValue]="0">Seleccionar cuenta…</option>@for (opcion of cuentaOpciones; track opcion.id) { <option [ngValue]="opcion.id">{{ opcion.label }}</option> }</select>
+          @if (!cuentasDeposito.length) { <div class="b-hint b-muted">Elige una caja para ver las cuentas de su agencia y moneda.</div> }
+        </div>
+        <div class="b-grid2"><div><label class="b-label">Monto</label><input class="b-input" type="number" step="0.01" min="0" [(ngModel)]="deposito.monto" placeholder="0.00"></div><div><label class="b-label">Referencia (N° boleta)</label><input class="b-input" type="text" [(ngModel)]="deposito.referencia" maxlength="100"></div></div>
+        <label class="b-label">Glosa (opcional)</label><input class="b-input" type="text" [(ngModel)]="deposito.glosa" maxlength="200" placeholder="Añade un detalle de la operación">
+        <label class="b-label">Comprobante (opcional)</label>
+        <div class="b-upload"><input type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" (change)="onComprobante($event)"><span class="b-muted b-xsmall">PDF o imagen, máx. 5 MB. Se adjunta al registrar.</span></div>
+        @if (comprobante) { <div class="b-hint">Adjunto listo: <strong>{{ comprobante.name }}</strong></div> }
+        <div class="b-note">La operación mueve el efectivo de la caja y el saldo de la cuenta bancaria en un solo paso.</div>
+      </div>
+      <footer class="bank-drawer-footer"><button class="b-btn b-btn-outline" type="button" (click)="cerrarDrawer()">Cancelar</button><button class="b-btn b-btn-primary" type="button" [disabled]="!puedeRegistrar || guardando" (click)="registrar()">{{ guardando ? 'Registrando…' : (deposito.tipo === 'D' ? 'Registrar depósito' : 'Registrar retiro') }}</button></footer>
+    } @else if (drawerMode === 'detail') {
+      @if (depositoSeleccionado; as d) {
+      <header class="bank-drawer-head" [class.deposit-head]="d.tipo === 'D'" [class.withdrawal-head]="d.tipo === 'R'">
+        <span class="bank-drawer-icon"><mat-icon>{{ d.tipo === 'D' ? 'south_west' : 'north_east' }}</mat-icon></span>
+        <div class="bank-drawer-copy"><h3>{{ d.tipo === 'D' ? 'Depósito' : 'Retiro' }} #{{ d.id }}</h3><p>{{ d.created_at | date:'dd/MM/yyyy HH:mm' }}</p></div>
+        <span class="operation-badge" [class.deposit-badge]="d.tipo === 'D'" [class.withdrawal-badge]="d.tipo === 'R'">{{ d.tipo === 'D' ? 'Depósito' : 'Retiro' }}</span>
+        <button class="b-btn b-btn-ghost b-btn-xs" type="button" aria-label="Cerrar" (click)="cerrarDrawer()"><mat-icon>close</mat-icon></button>
+      </header>
+      <div class="bank-drawer-body">
+        <div class="deposit-detail-amount" [class.is-withdrawal]="d.tipo === 'R'"><span>Monto {{ d.tipo === 'D' ? 'depositado' : 'retirado' }}</span><strong>{{ d.tipo === 'D' ? '+' : '−' }} {{ d.monto | number:'1.2-2' }} {{ d.moneda }}</strong></div>
+        <div class="deposit-flow detail-flow" [class.is-withdrawal]="d.tipo === 'R'"><div class="deposit-flow-node"><span class="deposit-flow-icon cash"><mat-icon>point_of_sale</mat-icon></span><span><strong>Caja {{ d.num_caja || '—' }}</strong><small>{{ d.tipo === 'D' ? 'Origen del efectivo' : 'Destino del efectivo' }}</small></span></div><mat-icon class="deposit-flow-arrow">arrow_forward</mat-icon><div class="deposit-flow-node"><span class="deposit-flow-icon bank"><mat-icon>account_balance</mat-icon></span><span><strong>{{ d.entidad }}</strong><small>{{ d.num_cuenta }} · {{ d.moneda }}</small></span></div></div>
+        <div class="deposit-detail-list">
+          <div class="deposit-detail-row"><mat-icon>tag</mat-icon><div><span>Referencia</span><strong>{{ d.referencia || '—' }}</strong></div></div>
+          <div class="deposit-detail-row"><mat-icon>person</mat-icon><div><span>Registrado por</span><strong>{{ d.usuario || '—' }}</strong></div></div>
+          <div class="deposit-detail-row"><mat-icon>verified</mat-icon><div><span>Estado</span><strong>{{ d.estado === 'A' ? 'Registrado' : d.estado }}</strong></div></div>
+          @if (d.glosa) { <div class="deposit-detail-row"><mat-icon>notes</mat-icon><div><span>Glosa</span><strong>{{ d.glosa }}</strong></div></div> }
+          <div class="deposit-detail-row"><mat-icon>attach_file</mat-icon><div><span>Comprobante</span><strong>{{ d.comprobante_nombre || (d.comprobante_path ? 'Archivo adjunto' : 'Sin comprobante') }}</strong></div></div>
+        </div>
+      </div>
+      <footer class="bank-drawer-footer">
+        @if (d.comprobante_path) { <a class="b-btn b-btn-outline" [href]="urlComprobante(d.comprobante_path)" target="_blank" rel="noopener"><mat-icon>visibility</mat-icon> Ver comprobante</a> }
+        <input #cd type="file" hidden accept=".pdf,.jpg,.jpeg,.png,.webp" (change)="subirComprobante(d, $event)">
+        <button class="b-btn b-btn-outline" type="button" [disabled]="subiendo === d.id" (click)="cd.click()"><mat-icon>attach_file</mat-icon>{{ subiendo === d.id ? 'Adjuntando…' : (d.comprobante_path ? 'Reemplazar' : 'Adjuntar comprobante') }}</button>
+      </footer>
+      }
+    }
+  </mat-drawer>
+</mat-drawer-container>

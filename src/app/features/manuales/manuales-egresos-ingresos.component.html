@@ -1,0 +1,208 @@
+<main class="manual-page manual-workspace">
+  <header class="page-heading">
+    <span class="heading-icon">⇅</span>
+    <div><small>MANUALES DEL SISTEMA · PUNTO DE VENTA</small><h1>Guía de {{ titulo }}</h1><p>{{ descripcion }}</p></div>
+    <app-manuales-imprimir></app-manuales-imprimir>
+  </header>
+
+  <div class="layout manual-layout">
+    <app-manuales-indice></app-manuales-indice>
+
+    <article class="document">
+      <div class="doc-top"><span>EGRESOS E INGRESOS</span><span>Guía paso a paso</span></div>
+      <h2>{{ titulo }}</h2>
+      <p class="intro">La caja seleccionada determina la moneda y el saldo sobre el que se registra la operación. Revisa el tipo de movimiento, el comprobante y el importe antes de guardar.</p>
+
+      <section class="notice"><b>Antes de empezar</b><span>Debes tener una caja abierta. Selecciona la caja y moneda correctas. El comprobante es obligatorio para egresos, ingresos y transacciones bancarias; admite PDF, JPG o PNG de hasta 5 MB.</span></section>
+
+      <section class="guide">
+        <h3>1. Selecciona la caja y revisa sus movimientos</h3>
+        <figure class="visual-card">
+          <figcaption><span class="step-number">01</span><span><b>Elige la caja de trabajo</b><small>Busca por número de caja o moneda. Revisa el saldo disponible antes de iniciar.</small></span></figcaption>
+          <div class="screen">
+            <div class="screen-title"><span class="screen-icon">▣</span><span><b>Egresos e ingresos</b><small>Registra movimientos y revisa su estado de autorización.</small></span><span class="annotated compact-target"><em>2 · Inicia un registro</em><svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1v25m0 0-7-8m7 8 7-8"/></svg><button class="primary">＋ Nuevo</button></span></div>
+            <div class="cash-toolbar">
+              <div class="cash-picker-label"><span class="screen-icon orange">▤</span><span><b>Caja de trabajo</b><small>Busca por número o moneda</small></span></div>
+              <div class="annotated"><em>1 · Selecciona la caja y moneda</em><svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1v25m0 0-7-8m7 8 7-8"/></svg><div class="control">⌕　Caja 29 · BOB　⌄</div></div>
+              <div class="balance"><small>Disponible en caja 29</small><b>61,550.00 <small>BOB</small></b></div>
+            </div>
+            <div class="list-head"><strong>Movimientos registrados</strong><span>Hoy · BOB</span></div>
+            @if (guia === 'egreso' || guia === 'egreso_autorizado') {
+              <div class="movement-row expense"><span class="round-icon red">↙</span><span class="row-copy"><b>Egreso <i class="badge amber">Pendiente</i></b><small>10:24 · Efectivo de caja · Papelería</small></span><strong class="negative">− 250.00 BOB</strong><span class="chevron">›</span></div>
+            } @else if (guia === 'ingreso' || guia === 'ingreso_autorizado') {
+              <div class="movement-row income"><span class="round-icon green">↗</span><span class="row-copy"><b>Ingreso <i class="badge green">Registrado</i></b><small>09:40 · Efectivo · Venta de producto</small></span><strong class="positive">＋ 800.00 BOB</strong><span class="chevron">›</span></div>
+            } @else {
+              <div class="movement-row"><span class="round-icon blue">▤</span><span class="row-copy"><b>Transacción bancaria <i class="badge green">Registrado</i></b><small>09:15 · Depósito bancario · Ref. 582014</small></span><strong class="positive">＋ 1,500.00 BOB</strong><span class="chevron">›</span></div>
+            }
+            <p class="caption"><i>1</i> Selecciona la caja abierta correcta y verifica el saldo y la moneda. <i>2</i> Pulsa Nuevo para abrir el panel de operaciones. Selecciona una fila para consultar su detalle.</p>
+          </div>
+        </figure>
+      </section>
+
+      <section class="guide">
+        <h3>2. Elige la operación en el panel lateral</h3>
+        <figure class="visual-card">
+          <figcaption><span class="step-number">02</span><span><b>Escoge el flujo que corresponde</b><small>El panel organiza movimientos directos, comprobantes autorizados y transacciones bancarias.</small></span></figcaption>
+          <div class="screen drawer-preview">
+            <div class="drawer-head"><span class="screen-icon orange">▣</span><span><b>Nuevo movimiento</b><small>Elige el tipo de operación.</small></span><span class="close">×</span></div>
+            <div class="operation-group"><h4>Movimientos de caja</h4><div class="operation-options">
+              <div class="annotated op-annotated">@if (guia === 'egreso') { <em>Guía: egreso directo</em><svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1v25m0 0-7-8m7 8 7-8"/></svg> }<div class="operation-card" [class.selected]="guia === 'egreso'"><span class="op-icon red">↙</span><span><b>Registrar egreso</b><small>Salida de caja que queda pendiente de autorización.</small></span><i>›</i></div></div>
+              <div class="annotated op-annotated">@if (guia === 'ingreso') { <em>Guía: ingreso directo</em><svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1v25m0 0-7-8m7 8 7-8"/></svg> }<div class="operation-card" [class.selected]="guia === 'ingreso'"><span class="op-icon green">↗</span><span><b>Registrar ingreso</b><small>Entrada de dinero sin comprobante contable previo.</small></span><i>›</i></div></div>
+            </div></div>
+            <div class="operation-group"><h4>Con comprobante contable</h4><div class="operation-options">
+              <div class="annotated op-annotated">@if (guia === 'egreso_autorizado') { <em>Guía: egreso autorizado</em><svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1v25m0 0-7-8m7 8 7-8"/></svg> }<div class="operation-card blue-card" [class.selected]="guia === 'egreso_autorizado'"><span class="op-icon blue">↙</span><span><b>Completar egreso autorizado</b><small>Busca el comprobante y aplica el débito a caja.</small></span><i>›</i></div></div>
+              <div class="annotated op-annotated">@if (guia === 'ingreso_autorizado') { <em>Guía: ingreso autorizado</em><svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1v25m0 0-7-8m7 8 7-8"/></svg> }<div class="operation-card blue-card" [class.selected]="guia === 'ingreso_autorizado'"><span class="op-icon blue">↗</span><span><b>Completar ingreso autorizado</b><small>Busca el comprobante y aplica el crédito a caja.</small></span><i>›</i></div></div>
+            </div></div>
+            <div class="operation-group"><h4>Operaciones bancarias</h4><div class="annotated op-annotated">@if (guia === 'bancaria') { <em>Guía: transacción bancaria</em><svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1v25m0 0-7-8m7 8 7-8"/></svg> }<div class="operation-card bank-card" [class.selected]="guia === 'bancaria'"><span class="op-icon slate">▤</span><span><b>Transacción bancaria</b><small>Depósito, retiro, ITF o intereses. Disponible para cajas BOB y USD.</small></span><i>›</i></div></div></div>
+            <p class="caption">La opción resaltada corresponde a esta guía. Los movimientos directos, los comprobantes autorizados y las operaciones bancarias tienen formularios y efectos distintos.</p>
+          </div>
+        </figure>
+      </section>
+
+      @if (guia === 'egreso') {
+        <section class="guide">
+          <h3>3. Registra un egreso directo</h3>
+          <p class="guide-intro">El egreso reduce el saldo de caja al registrarse y queda pendiente de autorización. Si se rechaza, el importe se devuelve a la caja.</p>
+          <figure class="visual-card">
+            <figcaption><span class="step-number">03</span><span><b>Completa el formulario de egreso</b><small>Elige origen y categoría, informa el monto, el motivo y adjunta el respaldo.</small></span></figcaption>
+            <div class="screen form-screen">
+              <div class="drawer-head expense-head"><span class="op-icon red">↙</span><span><b>Registrar egreso</b><small>Moneda de caja: BOB</small></span><span class="close">×</span></div>
+              <div class="info warn"><b>◷</b><span>El egreso afecta el saldo inmediatamente y queda <strong>pendiente de autorización</strong>. Si se rechaza, el importe se devuelve a la caja.</span></div>
+              <div class="field-grid two">
+                <div class="annotated"><em>1 · Define de dónde sale el dinero</em><svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1v25m0 0-7-8m7 8 7-8"/></svg><label>Origen del egreso</label><div class="control">▣　Efectivo de caja　⌄</div><small class="option-hint">Opciones: Efectivo de caja · Cuenta bancaria</small></div>
+                <div class="annotated"><em>2 · Clasifica el gasto</em><svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1v25m0 0-7-8m7 8 7-8"/></svg><label>Categoría</label><div class="control">▦　Gastos operativos　⌄</div><small class="option-hint">Gastos operativos · Sueldos / salarios · Servicios · Impuestos · Alquileres · Mantenimiento · Compras · Otros</small></div>
+                <div class="annotated"><em>3 · Ingresa un importe mayor que cero</em><svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1v25m0 0-7-8m7 8 7-8"/></svg><label>Monto del egreso *</label><div class="control invalid">0.00 <small>BOB</small></div><small class="error">Ingresa un monto mayor que cero.</small></div>
+                <div class="annotated"><em>4 · Identifica a quien recibe el dinero</em><svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1v25m0 0-7-8m7 8 7-8"/></svg><label>Beneficiario</label><div class="control">Persona o entidad que recibe</div></div>
+                <div class="annotated wide"><em>5 · Explica el motivo del egreso</em><svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1v25m0 0-7-8m7 8 7-8"/></svg><label>Concepto / motivo *</label><div class="control textarea">Describe para qué se realiza el egreso</div><small class="hint">Mínimo 3 caracteres · máximo 500</small></div>
+                <div class="annotated wide"><em>6 · Adjunta el respaldo obligatorio</em><svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1v25m0 0-7-8m7 8 7-8"/></svg><label>Comprobante *</label><div class="upload">＋　Adjuntar comprobante <small>PDF, JPG o PNG · máximo 5 MB</small></div><small class="error">Adjunta el comprobante para habilitar el registro.</small></div>
+              </div>
+              <div class="form-actions"><button class="outline">Cancelar</button><span class="annotated compact-target"><em>7 · Registra cuando los datos estén completos</em><svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1v25m0 0-7-8m7 8 7-8"/></svg><button class="primary disabled">✓　Registrar Egreso</button></span></div>
+              <p class="caption"><i>1</i> Define si el egreso se descuenta de efectivo o de banca. <i>2</i> Selecciona una categoría. <i>3–5</i> Completa monto, beneficiario y concepto. <i>6</i> Adjunta el comprobante; es obligatorio. <i>7</i> El botón se habilita cuando monto, concepto y archivo sean válidos.</p>
+            </div>
+          </figure>
+        </section>
+      }
+
+      @if (guia === 'ingreso') {
+        <section class="guide">
+          <h3>3. Registra un ingreso directo</h3>
+          <p class="guide-intro">El ingreso se acredita inmediatamente en la caja seleccionada. Registra un concepto claro para facilitar su revisión.</p>
+          <figure class="visual-card">
+            <figcaption><span class="step-number">03</span><span><b>Completa el formulario de ingreso</b><small>Indica el origen, categoría, monto, quién entrega el dinero y adjunta el comprobante.</small></span></figcaption>
+            <div class="screen form-screen">
+              <div class="drawer-head income-head"><span class="op-icon green">↗</span><span><b>Registrar ingreso</b><small>Moneda de caja: BOB</small></span><span class="close">×</span></div>
+              <div class="info success"><b>ⓘ</b><span>El ingreso se acredita inmediatamente en la caja seleccionada. Registra un concepto claro para facilitar su revisión.</span></div>
+              <div class="field-grid two">
+                <div class="annotated"><em>1 · Indica de dónde viene el dinero</em><svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1v25m0 0-7-8m7 8 7-8"/></svg><label>Origen del ingreso *</label><div class="control">▣　Efectivo　⌄</div><small class="option-hint">Efectivo · Transferencia · Depósito · Devolución · Otros</small></div>
+                <div class="annotated"><em>2 · Selecciona la categoría</em><svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1v25m0 0-7-8m7 8 7-8"/></svg><label>Categoría *</label><div class="control">▦　Otros　⌄</div><small class="option-hint">Ventas · Servicios · Transferencias · Devoluciones · Otros</small></div>
+                <div class="annotated"><em>3 · Ingresa un importe mayor que cero</em><svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1v25m0 0-7-8m7 8 7-8"/></svg><label>Monto del ingreso *</label><div class="control invalid">0.00 <small>BOB</small></div><small class="error">Ingresa un monto mayor que cero.</small></div>
+                <div class="annotated"><em>4 · Identifica quién entrega</em><svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1v25m0 0-7-8m7 8 7-8"/></svg><label>Entregado por</label><div class="control">Persona o entidad que entrega</div></div>
+                <div class="annotated wide"><em>5 · Describe el motivo del ingreso</em><svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1v25m0 0-7-8m7 8 7-8"/></svg><label>Concepto / motivo *</label><div class="control textarea">Describe el motivo del ingreso</div><small class="hint">Mínimo 3 caracteres · máximo 500</small></div>
+                <div class="annotated wide"><em>6 · Adjunta el comprobante obligatorio</em><svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1v25m0 0-7-8m7 8 7-8"/></svg><label>Comprobante *</label><div class="upload">＋　Adjuntar comprobante <small>PDF, JPG o PNG · máximo 5 MB</small></div></div>
+              </div>
+              <div class="form-actions"><button class="outline">Cancelar</button><span class="annotated compact-target"><em>7 · Confirma el crédito a caja</em><svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1v25m0 0-7-8m7 8 7-8"/></svg><button class="primary disabled">✓　Ejecutar</button></span></div>
+              <p class="caption"><i>1–2</i> Selecciona origen y categoría. <i>3–5</i> Completa importe, persona y concepto. <i>6</i> Adjunta el respaldo. El botón Ejecutar se habilita cuando monto, concepto y comprobante sean válidos; al confirmar, el saldo se acredita de inmediato.</p>
+            </div>
+          </figure>
+        </section>
+      }
+
+      @if (guia === 'egreso_autorizado') {
+        <section class="guide">
+          <h3>3. Completa un egreso con comprobante autorizado</h3>
+          <figure class="visual-card">
+            <figcaption><span class="step-number">03</span><span><b>Busca y verifica el asiento contable</b><small>El sistema toma moneda, importe y subcuenta del comprobante; no los escribas manualmente.</small></span></figcaption>
+            <div class="screen form-screen">
+              <div class="drawer-head"><span class="op-icon blue">↙</span><span><b>Completar egreso autorizado</b><small>Moneda de caja: BOB</small></span><span class="close">×</span></div>
+              <div class="info blue-info"><b>✓</b><span>Busca el comprobante contable. El POS tomará de su copartida la moneda, el importe y la subcuenta.</span></div>
+              <div class="field-grid search-grid"><div class="annotated"><em>1 · Ingresa el número de comprobante</em><svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1v25m0 0-7-8m7 8 7-8"/></svg><label>Número de comprobante *</label><div class="control invalid">▤　Ej. 123</div><small class="error">Ingresa un número válido.</small></div><span class="annotated compact-target"><em>2 · Consulta el asiento</em><svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1v25m0 0-7-8m7 8 7-8"/></svg><button class="outline">⌕　Buscar comprobante</button></span></div>
+              <div class="accounting-result"><b>✓　Comprobante encontrado</b><span>Glosa <strong>Compra de suministros</strong></span><span>Moneda de la copartida <strong>BOB</strong></span><span>Importe autorizado <strong>1,250.00 BOB</strong></span><span>Fecha asiento <strong>06/11/2026</strong></span></div>
+              <div class="info warn"><b>!</b><span>Si la moneda del comprobante no coincide con la caja, selecciona una caja de esa moneda. El sistema no permitirá confirmar si no coinciden.</span></div>
+              <div class="form-actions"><button class="outline">Cancelar</button><span class="annotated compact-target"><em>3 · Aplica el comprobante a la caja</em><svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1v25m0 0-7-8m7 8 7-8"/></svg><button class="primary disabled">✓　Confirmar Egreso</button></span></div>
+              <p class="caption"><i>1</i> Escribe el número del comprobante. <i>2</i> Pulsa Buscar comprobante y revisa glosa, moneda, importe y fecha. <i>3</i> Confirma solo cuando la moneda coincida con la caja y los datos sean correctos.</p>
+            </div>
+          </figure>
+        </section>
+      }
+
+      @if (guia === 'ingreso_autorizado') {
+        <section class="guide">
+          <h3>3. Completa un ingreso con comprobante autorizado</h3>
+          <figure class="visual-card">
+            <figcaption><span class="step-number">03</span><span><b>Busca el comprobante y acredita la caja</b><small>Verifica la copartida y confirma que la moneda del asiento coincida con la caja.</small></span></figcaption>
+            <div class="screen form-screen">
+              <div class="drawer-head income-head"><span class="op-icon blue">↗</span><span><b>Completar ingreso autorizado</b><small>Moneda de caja: BOB</small></span><span class="close">×</span></div>
+              <div class="info blue-info"><b>✓</b><span>Busca el comprobante contable. El POS tomará moneda, importe y subcuenta de la copartida.</span></div>
+              <div class="field-grid search-grid"><div class="annotated"><em>1 · Ingresa el número de comprobante</em><svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1v25m0 0-7-8m7 8 7-8"/></svg><label>Número de comprobante *</label><div class="control">▤　Ej. 456</div></div><span class="annotated compact-target"><em>2 · Consulta el asiento</em><svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1v25m0 0-7-8m7 8 7-8"/></svg><button class="outline">⌕　Buscar comprobante</button></span></div>
+              <div class="accounting-result"><b>✓　Comprobante encontrado</b><span>Glosa <strong>Ingreso por servicios</strong></span><span>Moneda de la copartida <strong>BOB</strong></span><span>Importe autorizado <strong>850.00 BOB</strong></span><span>Fecha asiento <strong>06/11/2026</strong></span></div>
+              <div class="info warn"><b>!</b><span>Si la caja está en otra moneda, cambia a una caja que coincida con el comprobante para habilitar la confirmación.</span></div>
+              <div class="form-actions"><button class="outline">Cancelar</button><span class="annotated compact-target"><em>3 · Confirma el abono a caja</em><svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1v25m0 0-7-8m7 8 7-8"/></svg><button class="primary disabled">✓　Confirmar Ingreso</button></span></div>
+              <p class="caption"><i>1</i> Introduce el número. <i>2</i> Busca y valida el asiento y su moneda. <i>3</i> Confirma para aplicar el crédito indicado por el comprobante.</p>
+            </div>
+          </figure>
+        </section>
+      }
+
+      @if (guia === 'bancaria') {
+        <section class="guide">
+          <h3>3. Registra una transacción bancaria</h3>
+          <p class="guide-intro">Esta operación está disponible únicamente para cajas BOB o USD. El importe, concepto y comprobante son obligatorios.</p>
+          <figure class="visual-card">
+            <figcaption><span class="step-number">03</span><span><b>Selecciona el tipo bancario y documenta el movimiento</b><small>Elige depósito, retiro, cobro de ITF o intereses; registra referencia si la tienes.</small></span></figcaption>
+            <div class="screen form-screen">
+              <div class="drawer-head bank-head"><span class="op-icon slate">▤</span><span><b>Transacción bancaria</b><small>Moneda de caja: BOB</small></span><span class="close">×</span></div>
+              <div class="info blue-info"><b>ⓘ</b><span>Las transacciones bancarias solo están habilitadas para cajas en BOB y USD.</span></div>
+              <div class="field-grid two">
+                <div class="annotated"><em>1 · Selecciona la operación del banco</em><svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1v25m0 0-7-8m7 8 7-8"/></svg><label>Tipo de transacción *</label><div class="control">⇄　Depósito bancario　⌄</div><small class="option-hint">Depósito bancario · Retiro bancario · Cobro de ITF · Intereses bancarios</small></div>
+                <div class="annotated"><em>2 · Registra el importe</em><svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1v25m0 0-7-8m7 8 7-8"/></svg><label>Monto *</label><div class="control invalid">0.00 <small>BOB</small></div><small class="error">Ingresa un monto mayor que cero.</small></div>
+                <div class="annotated"><em>3 · Anota la referencia de respaldo</em><svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1v25m0 0-7-8m7 8 7-8"/></svg><label>Referencia bancaria</label><div class="control">N° de boleta / comprobante</div></div>
+                <div class="annotated"><em>4 · Describe la transacción</em><svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1v25m0 0-7-8m7 8 7-8"/></svg><label>Concepto *</label><div class="control">Detalle de la transacción</div><small class="error">Mínimo 3 caracteres.</small></div>
+                <div class="annotated wide"><em>5 · Adjunta el comprobante</em><svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1v25m0 0-7-8m7 8 7-8"/></svg><label>Comprobante *</label><div class="upload">＋　Adjuntar comprobante <small>PDF, JPG o PNG · máximo 5 MB</small></div></div>
+              </div>
+              <div class="form-actions"><button class="outline">Cancelar</button><span class="annotated compact-target"><em>6 · Ejecuta el movimiento validado</em><svg viewBox="0 0 24 32" aria-hidden="true"><path d="M12 1v25m0 0-7-8m7 8 7-8"/></svg><button class="primary disabled">✓　Ejecutar</button></span></div>
+              <p class="caption"><i>1</i> Escoge Depósito, Retiro, ITF o Intereses bancarios. <i>2–4</i> Completa monto, referencia opcional y concepto obligatorio. <i>5</i> Adjunta el respaldo. <i>6</i> Ejecuta cuando la moneda de caja sea BOB o USD y los datos obligatorios estén completos.</p>
+            </div>
+          </figure>
+        </section>
+      }
+
+      @if (guia === 'egreso' || guia === 'ingreso') {
+      <section class="guide">
+        <h3>Revisa el detalle y el estado</h3>
+        <figure class="visual-card">
+          <figcaption><span class="step-number">04</span><span><b>Abre un movimiento desde la lista</b><small>El panel lateral muestra los datos de este tipo de movimiento y su estado.</small></span></figcaption>
+          <div class="screen detail-screen">
+            @if (guia === 'egreso') {
+              <div class="drawer-head expense-head"><span class="op-icon red">↙</span><span><b>Egreso</b><small>06/11/2026 10:24</small></span><i class="badge amber">Pendiente</i><span class="close">×</span></div>
+              <div class="amount-banner"><span>Monto</span><strong class="negative">− 250.00 <small>BOB</small></strong></div>
+              <div class="detail-rows"><div>▤ <span>Concepto</span><b>Compra de materiales de oficina</b></div><div>▣ <span>Origen</span><b>Efectivo de caja</b></div><div>♙ <span>Beneficiario</span><b>Proveedor local</b></div><div>▦ <span>Categoría</span><b>Compras</b></div><div>⌁ <span>Comprobante adjunto</span><b>factura_250.pdf</b></div><div>◉ <span>Impacto en saldo</span><b>− 250.00 BOB</b></div></div>
+              <p class="caption">El egreso directo debita el saldo al registrarse y queda Pendiente de autorización. Si es rechazado, el importe se devuelve a la caja.</p>
+            } @else {
+              <div class="drawer-head income-head"><span class="op-icon green">↗</span><span><b>Ingreso</b><small>06/11/2026 09:40</small></span><i class="badge green">Registrado</i><span class="close">×</span></div>
+              <div class="amount-banner income-amount"><span>Monto</span><strong class="positive">＋ 800.00 <small>BOB</small></strong></div>
+              <div class="detail-rows"><div>▤ <span>Concepto</span><b>Venta de producto</b></div><div>▣ <span>Origen</span><b>Efectivo</b></div><div>♙ <span>Entregado por</span><b>Cliente</b></div><div>▦ <span>Categoría</span><b>Ventas</b></div><div>⌁ <span>Comprobante adjunto</span><b>recibo_800.pdf</b></div><div>◉ <span>Impacto en saldo</span><b>＋ 800.00 BOB</b></div></div>
+              <p class="caption">El ingreso directo se acredita inmediatamente. En el detalle puedes comprobar quién entregó el dinero, el concepto, la categoría y el respaldo.</p>
+            }
+          </div>
+        </figure>
+      </section>
+
+      }
+
+      <section class="steps">
+        <h3>Antes de confirmar</h3>
+        <div><b>1</b><span><strong>Comprueba la caja y la moneda</strong><small>La operación se registra sobre la caja abierta seleccionada. Confirma que corresponde a la agencia y moneda del movimiento.</small></span></div>
+        @if (guia === 'egreso' || guia === 'ingreso' || guia === 'bancaria') {
+          <div><b>2</b><span><strong>Completa los datos obligatorios</strong><small>Ingresa un monto mayor que cero y un concepto claro. Adjunta el comprobante en PDF, JPG o PNG de hasta 5 MB.</small></span></div>
+          <div><b>3</b><span><strong>Verifica el efecto antes de guardar</strong><small>@if (guia === 'egreso') { El egreso reduce el saldo y queda pendiente de autorización. } @else if (guia === 'ingreso') { El ingreso acredita el saldo de caja al confirmarse. } @else { La transacción bancaria solo está disponible para caja BOB o USD; comprueba su tipo y respaldo. }</small></span></div>
+        } @else {
+          <div><b>2</b><span><strong>Busca el comprobante contable</strong><small>Ingresa su número y revisa la glosa, fecha, moneda e importe que devuelve el sistema.</small></span></div>
+          <div><b>3</b><span><strong>Confirma únicamente si coincide</strong><small>@if (guia === 'egreso_autorizado') { Verifica que el comprobante corresponda a un egreso y que su moneda coincida con la caja; al confirmar se aplica el débito autorizado. } @else { Verifica que el comprobante corresponda a un ingreso y que su moneda coincida con la caja; al confirmar se aplica el crédito autorizado. }</small></span></div>
+        }
+      </section>
+
+      <footer class="doc-footer"><span>Manual integrado en el sistema · Egresos e ingresos</span><a routerLink="/egresos-ingresos">Ir a Egresos e ingresos →</a></footer>
+      <app-manual-lectura [manualKey]="manualKey"></app-manual-lectura>
+    </article>
+  </div>
+</main>

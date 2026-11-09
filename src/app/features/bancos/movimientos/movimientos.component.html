@@ -1,0 +1,91 @@
+<header class="b-head movement-page-head">
+  <div class="b-head-icon"><mat-icon>receipt_long</mat-icon></div>
+  <div class="b-head-text"><h2>Movimientos bancarios</h2><span>Consulta los movimientos y saldos de tus cuentas bancarias.</span></div>
+  <a routerLink="/manuales/bancos" [queryParams]="{tipo:'movimientos'}" class="bank-manual-help">? Manual</a>
+</header>
+
+<section class="b-card movement-balances-card">
+  <button class="movement-section-toggle" type="button" (click)="resumenAbierto = !resumenAbierto" [attr.aria-expanded]="resumenAbierto">
+    <span class="movement-section-icon"><mat-icon>account_balance_wallet</mat-icon></span>
+    <span class="movement-section-title"><strong>Saldos bancarios</strong><small>Consolidado por entidad y moneda</small></span>
+    <span class="movement-section-total">{{ store.cuentas().length }} cuentas</span>
+    <mat-icon class="movement-section-chevron" [class.expanded]="resumenAbierto">expand_more</mat-icon>
+  </button>
+  @if (resumenAbierto) {
+    @if (!filasSaldo.length) { <div class="b-empty">No hay cuentas bancarias para resumir.</div> }
+    @else {
+      <div class="b-table-wrap movement-balance-table"><table class="b-table">
+        <thead><tr><th>Entidad financiera</th><th class="b-r">Cuentas</th>@for (moneda of monedas; track moneda) { <th class="b-r">Saldo {{ moneda }}</th> }<th class="b-r">Movimientos</th></tr></thead>
+        <tbody>@for (fila of filasSaldo; track fila.entidad) {
+          <tr><td><div class="movement-bank-name"><app-bank-logo [entidad]="fila.entidad" [size]="30"></app-bank-logo><strong>{{ fila.entidad }}</strong></div></td><td class="b-r">{{ fila.cuentas }}</td>
+            @for (moneda of monedas; track moneda) { <td class="b-r b-strong" [class.b-neg]="(fila.porMoneda[moneda] || 0) < 0">{{ fila.porMoneda[moneda] != null ? (fila.porMoneda[moneda] | number:'1.2-2') : '—' }}</td> }
+            <td class="b-r"><button class="b-btn b-btn-outline b-btn-sm bank-movements-action" type="button" (click)="verMovimientosBanco(fila.id_entidad)" [attr.aria-label]="'Ver movimientos de ' + fila.entidad"><mat-icon>receipt_long</mat-icon> Movimientos</button></td>
+          </tr>
+        }</tbody>
+        <tfoot><tr><td class="b-strong">Total</td><td class="b-r b-strong">{{ store.cuentas().length }}</td>@for (moneda of monedas; track moneda) { <td class="b-r b-strong">{{ totalMoneda(moneda) | number:'1.2-2' }}</td> }<td></td></tr></tfoot>
+      </table></div>
+    }
+  }
+</section>
+
+<section class="b-card movement-ledger-card">
+  <div class="b-card-head movement-ledger-head">
+    <div><h3>Historial de movimientos</h3><span class="b-muted b-small">{{ movimientos.length }} registro(s) · cargos, abonos y referencias de saldo</span></div>
+    <div class="b-card-actions">
+      <button class="b-btn b-btn-outline b-btn-sm movement-export-action" type="button" (click)="imprimirReporte()" [disabled]="!movimientos.length || cargandoMovimientos" title="Imprimir / Guardar PDF" aria-label="Imprimir o guardar movimientos como PDF"><mat-icon>print</mat-icon></button>
+      <button class="b-btn b-btn-outline b-btn-sm movement-export-action download" type="button" (click)="exportarCsv()" [disabled]="!movimientos.length || cargandoMovimientos" title="Exportar CSV" aria-label="Exportar movimientos a CSV"><mat-icon>download</mat-icon></button>
+      <button class="b-btn b-btn-outline b-btn-sm" type="button" (click)="filtrosAbiertos = !filtrosAbiertos" [attr.aria-expanded]="filtrosAbiertos"><mat-icon>filter_list</mat-icon> Filtros @if (filtrosActivos) { <span class="b-dot">{{ filtrosActivos }}</span> }</button>
+      <button class="b-btn b-btn-primary b-btn-sm" type="button" (click)="loadMovimientos()" [disabled]="cargandoMovimientos"><mat-icon>search</mat-icon> Buscar</button>
+    </div>
+  </div>
+
+  <div class="movement-quick-ranges"><span>Período:</span>
+    <button class="b-btn b-btn-ghost b-btn-sm" type="button" (click)="rangoRapido('hoy')">Hoy</button>
+    <button class="b-btn b-btn-ghost b-btn-sm" type="button" (click)="rangoRapido('semana')">Últimos 7 días</button>
+    <button class="b-btn b-btn-ghost b-btn-sm" type="button" (click)="rangoRapido('mes')">Este mes</button>
+    @if (filtros.desde || filtros.hasta) { <span class="movement-date-range">{{ filtros.desde || 'Inicio' }} — {{ filtros.hasta || 'Hoy' }}</span> }
+  </div>
+
+  @if (filtrosAbiertos) {
+    <div class="movement-filter-panel">
+      <div class="b-grid3">
+        <div><label class="b-label">Desde</label><input class="b-input" type="date" [(ngModel)]="filtros.desde"></div>
+        <div><label class="b-label">Hasta</label><input class="b-input" type="date" [(ngModel)]="filtros.hasta"></div>
+        <div><label class="b-label">Cuenta</label><select class="b-input" [(ngModel)]="filtros.cuenta"><option value="">Todas las cuentas</option>@for (c of cuentasDeMovimientos; track c.num_cuenta) { <option [value]="c.num_cuenta">{{ c.entidad }} · {{ c.num_cuenta }} ({{ c.moneda }})</option> }</select></div>
+        <div><label class="b-label">Entidad</label><select class="b-input" [(ngModel)]="filtros.entidad"><option [ngValue]="0">Todas las entidades</option>@for (e of entidadesDisponibles; track e.id) { <option [ngValue]="e.id">{{ e.nombre }}</option> }</select></div>
+        <div><label class="b-label">Moneda</label><select class="b-input" [(ngModel)]="filtros.moneda"><option [ngValue]="0">Todas las monedas</option>@for (m of monedasDisponibles; track m.id) { <option [ngValue]="m.id">{{ m.abrev }}</option> }</select></div>
+        <div><label class="b-label">Tipo de movimiento</label><select class="b-input" [(ngModel)]="filtros.conciliacion"><option value="TODO">Todos los tipos</option><option value="ST,ET,RT">Traspasos</option><option value="DE,DB,SE,RB">Depósitos y retiros</option><option value="CC,IC">Cheques</option><option value="DR,SR">Remesas</option><option value="A,C">Apertura / Cierre</option><option value="TF,QC">Transferencias y QR</option></select></div>
+        <div><label class="b-label">Monto mínimo</label><input class="b-input" type="number" step="0.01" [(ngModel)]="filtros.monto_min" placeholder="Sin mínimo"></div>
+        <div><label class="b-label">Monto máximo</label><input class="b-input" type="number" step="0.01" [(ngModel)]="filtros.monto_max" placeholder="Sin máximo"></div>
+        <div><label class="b-label">Buscar movimiento</label><input class="b-input" type="text" [(ngModel)]="filtros.texto" (keyup.enter)="loadMovimientos()" placeholder="Glosa, cuenta o usuario…"></div>
+      </div>
+      <div class="movement-filter-actions"><button class="b-btn b-btn-ghost b-btn-sm" type="button" (click)="limpiarFiltros()">Limpiar filtros</button><button class="b-btn b-btn-primary b-btn-sm" type="button" (click)="loadMovimientos()" [disabled]="cargandoMovimientos">Aplicar filtros</button></div>
+    </div>
+  }
+
+  @if (totalesMov) {
+    <div class="movement-totals">
+      <div class="movement-total charge"><span><i></i>Cargos</span><strong>{{ totalesMov.cargos | number:'1.2-2' }}</strong></div>
+      <div class="movement-total credit"><span><i></i>Abonos</span><strong>{{ totalesMov.abonos | number:'1.2-2' }}</strong></div>
+      <div class="movement-total net"><span><i></i>Neto</span><strong [class.b-neg]="totalesMov.neto < 0">{{ totalesMov.neto | number:'1.2-2' }}</strong></div>
+    </div>
+  }
+
+  @if (cargandoMovimientos) { <div class="movement-state"><mat-icon class="movement-spinner">progress_activity</mat-icon><strong>Cargando movimientos…</strong></div> }
+  @else if (errorMovimientos) { <div class="movement-state movement-error"><mat-icon>error_outline</mat-icon><strong>{{ errorMovimientos }}</strong><button class="b-btn b-btn-outline b-btn-sm" type="button" (click)="loadMovimientos()">Reintentar</button></div> }
+  @else if (!movimientos.length) { <div class="movement-state"><mat-icon>manage_search</mat-icon><strong>Sin movimientos para los filtros elegidos</strong><span>Ajusta el período o elimina algún filtro para ampliar la búsqueda.</span></div> }
+  @else {
+    <div class="b-table-wrap movement-table-wrap"><table class="b-table movement-table">
+      <thead><tr><th>Fecha</th><th>Entidad / cuenta</th><th>Movimiento</th><th>Detalle</th><th class="b-r">Importe</th><th>Usuario</th></tr></thead>
+      <tbody>@for (m of movimientos; track m.clave + '-' + m.fecha + '-' + m.monto + '-' + $index) {
+        <tr><td class="b-nowrap"><strong>{{ m.fecha | date:'dd/MM/yy' }}</strong><small class="movement-time">{{ m.fecha | date:'HH:mm' }}</small></td>
+          <td><strong class="movement-entity">{{ m.entidad }}</strong><small class="movement-account b-mono">{{ m.num_cuenta }} · {{ m.moneda }}</small></td>
+          <td><span class="movement-type" [class.credit-type]="m.monto >= 0" [class.charge-type]="m.monto < 0">{{ m.tipo }}</span></td>
+          <td class="movement-description" [title]="m.glosa || ''">{{ m.glosa || 'Sin descripción' }}</td>
+          <td class="b-r movement-amount" [class.positive]="m.monto >= 0" [class.negative]="m.monto < 0">{{ m.monto >= 0 ? '+' : '−' }} {{ (m.monto >= 0 ? m.monto : -m.monto) | number:'1.2-2' }} <small>{{ m.moneda }}</small></td>
+          <td class="movement-user">{{ m.usuario || '—' }}</td></tr>
+      }</tbody>
+    </table></div>
+    <div class="movement-list-footer"><span>Mostrando <strong>{{ movimientos.length }}</strong> movimiento(s)</span><span>Usa los filtros para acotar el historial o exporta la lista a CSV.</span></div>
+  }
+</section>

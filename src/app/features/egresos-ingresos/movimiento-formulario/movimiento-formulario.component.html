@@ -1,0 +1,70 @@
+<div class="form-card">
+  <div class="form-head">
+    <button mat-icon-button type="button" class="btn-back" (click)="volver.emit()" aria-label="Volver"><mat-icon>arrow_back</mat-icon></button>
+    <h3 class="form-title">{{ titulo }}</h3>
+    <span class="currency-context" *ngIf="moneda">Moneda de caja: <strong>{{ moneda }}</strong></span>
+  </div>
+
+  <ng-container *ngIf="operacion === 'egreso'">
+    <div class="info-bar warn"><mat-icon>schedule</mat-icon><span>El egreso afecta el saldo inmediatamente y queda <strong>pendiente de autorización</strong>. Si se rechaza, el importe se devuelve a la caja.</span></div>
+    <div class="field-row">
+      <mat-form-field appearance="outline"><mat-label>Origen del egreso</mat-label><mat-icon matPrefix>payments</mat-icon><mat-select [(ngModel)]="form.origenEgreso"><mat-option value="caja">Efectivo de caja</mat-option><mat-option value="banca">Cuenta bancaria</mat-option></mat-select></mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>Categoría</mat-label><mat-icon matPrefix>category</mat-icon><mat-select [(ngModel)]="form.categoriaEgreso"><mat-option value="gastos_operativos">Gastos operativos</mat-option><mat-option value="sueldos">Sueldos / salarios</mat-option><mat-option value="servicios">Servicios</mat-option><mat-option value="impuestos">Impuestos</mat-option><mat-option value="alquileres">Alquileres</mat-option><mat-option value="mantenimiento">Mantenimiento</mat-option><mat-option value="compras">Compras</mat-option><mat-option value="otros">Otros</mat-option></mat-select></mat-form-field>
+    </div>
+    <div class="field-row">
+      <mat-form-field appearance="outline" [class.required-missing]="!(form.monto > 0)"><mat-label>Monto del egreso *</mat-label><span matTextSuffix>{{ moneda }}</span><input matInput type="number" [(ngModel)]="form.monto" #montoEgreso="ngModel" min="0.01" step="0.01" required placeholder="0.00"><mat-error *ngIf="attempted && montoEgreso.invalid">Ingresa un monto mayor que cero.</mat-error></mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>Beneficiario</mat-label><mat-icon matPrefix>person</mat-icon><input matInput [(ngModel)]="form.beneficiario" maxlength="200" placeholder="Persona o entidad que recibe"></mat-form-field>
+    </div>
+    <mat-form-field appearance="outline" class="full-field" [class.required-missing]="conceptoInvalido"><mat-label>Concepto / motivo *</mat-label><mat-icon matPrefix>description</mat-icon><textarea matInput [(ngModel)]="form.concepto" #conceptoEgreso="ngModel" required minlength="3" maxlength="500" rows="2" placeholder="Describe para qué se realiza el egreso"></textarea><mat-error *ngIf="attempted && conceptoEgreso.invalid">Escribe un concepto de al menos 3 caracteres.</mat-error></mat-form-field>
+    <ng-container *ngTemplateOutlet="comprobante"></ng-container>
+  </ng-container>
+
+  <ng-container *ngIf="operacion === 'ingreso'">
+    <div class="info-bar green"><mat-icon>info</mat-icon><span>El ingreso se acredita inmediatamente en la caja seleccionada. Registra un concepto claro para facilitar su revisión.</span></div>
+    <div class="field-row">
+      <mat-form-field appearance="outline"><mat-label>Origen del ingreso *</mat-label><mat-icon matPrefix>payments</mat-icon><mat-select [(ngModel)]="form.origenIngreso" required><mat-option value="efectivo">Efectivo</mat-option><mat-option value="transferencia">Transferencia</mat-option><mat-option value="deposito">Depósito</mat-option><mat-option value="devolucion">Devolución</mat-option><mat-option value="otros">Otros</mat-option></mat-select></mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>Categoría *</mat-label><mat-icon matPrefix>category</mat-icon><mat-select [(ngModel)]="form.categoriaIngreso" required><mat-option value="ventas">Ventas</mat-option><mat-option value="servicios">Servicios</mat-option><mat-option value="transferencias">Transferencias</mat-option><mat-option value="devoluciones">Devoluciones</mat-option><mat-option value="otros">Otros</mat-option></mat-select></mat-form-field>
+    </div>
+    <div class="field-row">
+      <mat-form-field appearance="outline" [class.required-missing]="!(form.monto > 0)"><mat-label>Monto del ingreso *</mat-label><span matTextSuffix>{{ moneda }}</span><input matInput type="number" [(ngModel)]="form.monto" #montoIngreso="ngModel" min="0.01" step="0.01" required placeholder="0.00"><mat-error *ngIf="attempted && montoIngreso.invalid">Ingresa un monto mayor que cero.</mat-error></mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>Entregado por</mat-label><mat-icon matPrefix>person</mat-icon><input matInput [(ngModel)]="form.entregadoPor" maxlength="200" placeholder="Persona o entidad que entrega"></mat-form-field>
+    </div>
+    <mat-form-field appearance="outline" class="full-field" [class.required-missing]="conceptoInvalido"><mat-label>Concepto / motivo *</mat-label><mat-icon matPrefix>description</mat-icon><textarea matInput [(ngModel)]="form.concepto" #conceptoIngreso="ngModel" required minlength="3" maxlength="500" rows="2" placeholder="Describe el motivo del ingreso"></textarea><mat-error *ngIf="attempted && conceptoIngreso.invalid">Escribe un concepto de al menos 3 caracteres.</mat-error></mat-form-field>
+    <ng-container *ngTemplateOutlet="comprobante"></ng-container>
+  </ng-container>
+
+  <ng-container *ngIf="operacion === 'egreso_autorizado'">
+    <div class="info-bar blue"><mat-icon>verified_user</mat-icon><span>Busca el comprobante contable. El POS tomará de su copartida la moneda, el importe y la subcuenta.</span></div>
+    <div class="field-row"><mat-form-field appearance="outline" [class.required-missing]="!(form.numeroAutorizado > 0)"><mat-label>Número de comprobante *</mat-label><mat-icon matPrefix>receipt_long</mat-icon><input matInput type="number" [(ngModel)]="form.numeroAutorizado" #numeroEgreso="ngModel" min="1" step="1" required placeholder="Ej. 123" (keyup.enter)="buscarComprobante.emit('E')"><mat-error *ngIf="attempted && numeroEgreso.invalid">Ingresa un número de comprobante válido.</mat-error></mat-form-field><button mat-flat-button color="primary" type="button" class="btn-search" (click)="buscarComprobante.emit('E')" [disabled]="buscandoAsiento"><mat-icon>{{ buscandoAsiento ? 'hourglass_top' : 'search' }}</mat-icon>{{ buscandoAsiento ? 'Buscando…' : 'Buscar comprobante' }}</button></div>
+    <ng-container *ngTemplateOutlet="asiento"></ng-container>
+  </ng-container>
+
+  <ng-container *ngIf="operacion === 'ingreso_autorizado'">
+    <div class="info-bar green"><mat-icon>verified_user</mat-icon><span>Busca el comprobante contable. El POS tomará moneda, importe y subcuenta de la copartida.</span></div>
+    <div class="field-row"><mat-form-field appearance="outline" [class.required-missing]="!(form.numeroAutorizado > 0)"><mat-label>Número de comprobante *</mat-label><mat-icon matPrefix>receipt_long</mat-icon><input matInput type="number" [(ngModel)]="form.numeroAutorizado" #numeroIngreso="ngModel" min="1" step="1" required placeholder="Ej. 456" (keyup.enter)="buscarComprobante.emit('I')"><mat-error *ngIf="attempted && numeroIngreso.invalid">Ingresa un número de comprobante válido.</mat-error></mat-form-field><button mat-flat-button color="primary" type="button" class="btn-search" (click)="buscarComprobante.emit('I')" [disabled]="buscandoAsiento"><mat-icon>{{ buscandoAsiento ? 'hourglass_top' : 'search' }}</mat-icon>{{ buscandoAsiento ? 'Buscando…' : 'Buscar comprobante' }}</button></div>
+    <ng-container *ngTemplateOutlet="asiento"></ng-container>
+  </ng-container>
+
+  <ng-container *ngIf="esTransaccionBancaria">
+    <div class="info-bar blue"><mat-icon>info</mat-icon><span>Las transacciones bancarias solo están habilitadas para cajas en BOB y USD.</span></div>
+    <div class="field-row">
+      <mat-form-field appearance="outline" [class.required-missing]="!form.tipoBancario"><mat-label>Tipo de transacción *</mat-label><mat-icon matPrefix>swap_horiz</mat-icon><mat-select [(ngModel)]="form.tipoBancario" #tipoBancario="ngModel" required><mat-option value="deposito">Depósito bancario</mat-option><mat-option value="retiro">Retiro bancario</mat-option><mat-option value="itf">Cobro de ITF</mat-option><mat-option value="intereses">Intereses bancarios</mat-option></mat-select><mat-error *ngIf="attempted && tipoBancario.invalid">Selecciona un tipo de transacción.</mat-error></mat-form-field>
+      <mat-form-field appearance="outline" [class.required-missing]="!(form.monto > 0)"><mat-label>Monto *</mat-label><span matTextSuffix>{{ moneda }}</span><input matInput type="number" [(ngModel)]="form.monto" #montoBancario="ngModel" min="0.01" step="0.01" required placeholder="0.00"><mat-error *ngIf="attempted && montoBancario.invalid">Ingresa un monto mayor que cero.</mat-error></mat-form-field>
+    </div>
+    <div class="field-row">
+      <mat-form-field appearance="outline"><mat-label>Referencia bancaria</mat-label><mat-icon matPrefix>tag</mat-icon><input matInput [(ngModel)]="form.referencia" placeholder="N° de boleta / comprobante"></mat-form-field>
+      <mat-form-field appearance="outline" [class.required-missing]="conceptoInvalido"><mat-label>Concepto *</mat-label><mat-icon matPrefix>description</mat-icon><input matInput [(ngModel)]="form.concepto" #conceptoBancario="ngModel" required minlength="3" maxlength="500" placeholder="Detalle de la transacción"><mat-error *ngIf="conceptoBancario.invalid">Ingresa un concepto de al menos 3 caracteres.</mat-error></mat-form-field>
+    </div>
+    <ng-container *ngTemplateOutlet="comprobante"></ng-container>
+  </ng-container>
+
+  <div class="form-actions"><button mat-stroked-button type="button" class="btn-cancel" (click)="cancelar.emit()">Cancelar</button><button mat-flat-button color="primary" type="button" class="btn-submit" (click)="enviar.emit()" [disabled]="submitting || !puedeEnviar"><mat-icon>{{ submitting ? 'hourglass_top' : 'check_circle' }}</mat-icon>{{ submitting ? 'Procesando…' : submitLabel }}</button></div>
+</div>
+
+<ng-template #comprobante>
+  <div class="field"><label>Comprobante *</label><div class="file-upload" [class.file-required]="!selectedFile"><input type="file" #fileInput accept=".pdf,.jpg,.jpeg,.png" (change)="archivoSeleccionado.emit($event)" style="display:none"><button mat-stroked-button type="button" class="btn-file" (click)="fileInput.click()"><mat-icon>attach_file</mat-icon>{{ selectedFile ? selectedFile.name : 'Adjuntar comprobante' }}</button><span class="file-hint">Requerido · PDF, JPG o PNG, máx. 5MB</span></div><div class="file-error" *ngIf="fileError" role="alert"><mat-icon>error_outline</mat-icon>{{ fileError }}</div><div class="file-required-message" *ngIf="!selectedFile && !fileError"><mat-icon>error_outline</mat-icon>Adjunta el comprobante para habilitar el registro.</div></div>
+</ng-template>
+
+<ng-template #asiento>
+  <div class="asiento-detail" *ngIf="asientoEncontrado"><div class="asiento-title"><mat-icon>task_alt</mat-icon><strong>Comprobante encontrado</strong><span class="account-code">{{ asientoEncontrado.codsubcuenta }}</span></div><div class="asiento-row"><span>Glosa:</span><strong>{{ asientoEncontrado.glosa }}</strong></div><div class="asiento-row"><span>Moneda de la copartida:</span><strong>{{ asientoEncontrado.moneda }}</strong></div><div class="asiento-row"><span>Importe autorizado:</span><strong>{{ asientoEncontrado.monto | number:'1.2-2' }} {{ asientoEncontrado.moneda }}</strong></div><div class="asiento-row"><span>Fecha asiento:</span><span>{{ asientoEncontrado.fecha_asiento }}</span></div><div class="asiento-warning" *ngIf="selectedCaja && selectedCaja.id_moneda !== asientoEncontrado.id_moneda"><mat-icon>warning</mat-icon>La caja seleccionada está en {{ selectedCaja.moneda }}; selecciona una caja en {{ asientoEncontrado.moneda }} para continuar.</div></div>
+</ng-template>

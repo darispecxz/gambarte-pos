@@ -1,0 +1,28 @@
+<section class="detail-pane" [class.expense-pane]="movimiento.tipo_operacion === 'egreso'" [class.income-pane]="movimiento.tipo_operacion === 'ingreso'">
+  <div class="detail-heading" [class.kind-expense]="movimiento.tipo_operacion === 'egreso'" [class.kind-income]="movimiento.tipo_operacion === 'ingreso'" [class.kind-bank]="movimiento.tipo_operacion === 'transaccion_bancaria'">
+    <span class="movement-icon" [class]="'movement-icon ' + claseIcono"><mat-icon>{{ icono }}</mat-icon></span>
+    <div><h2>{{ titulo }}</h2><p>{{ movimiento.created_at | date:'dd/MM/yyyy HH:mm' }}</p></div>
+    <span class="estado-badge header-status" [class]="'estado-badge header-status ' + claseEstado">{{ estado }}</span>
+    <button mat-icon-button type="button" class="panel-close" (click)="cerrar.emit()" aria-label="Cerrar detalle"><mat-icon>close</mat-icon></button>
+  </div>
+  <div class="detail-total" [class.negative]="movimiento.tipo_operacion === 'egreso'" [class.positive]="movimiento.tipo_operacion === 'ingreso'">
+    <span>Monto</span>
+    <strong>{{ movimiento.tipo_operacion === 'egreso' ? '−' : '+' }} {{ movimiento.monto | number:'1.2-2' }} <small>{{ movimiento.moneda }}</small></strong>
+  </div>
+
+  <div class="movement-details">
+    <div class="movement-detail-row"><mat-icon>description</mat-icon><div><span>Concepto</span><strong>{{ movimiento.metadata.concepto || movimiento.metadata.glosa || titulo }}</strong></div></div>
+    <div class="movement-detail-row" *ngIf="movimiento.origen"><mat-icon>payments</mat-icon><div><span>Origen</span><strong>{{ movimiento.origen === 'caja' ? 'Efectivo de caja' : 'Cuenta bancaria' }}</strong></div></div>
+    <div class="movement-detail-row" *ngIf="movimiento.metadata.origen_ingreso"><mat-icon>payments</mat-icon><div><span>Origen del ingreso</span><strong>{{ origenIngresoLabel(movimiento.metadata.origen_ingreso!) }}</strong></div></div>
+    <div class="movement-detail-row" *ngIf="movimiento.metadata.entregado_por"><mat-icon>person</mat-icon><div><span>Entregado por</span><strong>{{ movimiento.metadata.entregado_por }}</strong></div></div>
+    <div class="movement-detail-row" *ngIf="movimiento.beneficiario"><mat-icon>person</mat-icon><div><span>Beneficiario</span><strong>{{ movimiento.beneficiario }}</strong></div></div>
+    <div class="movement-detail-row" *ngIf="movimiento.comprobante_nombre || movimiento.metadata.comprobante_nombre"><mat-icon>attach_file</mat-icon><div><span>Comprobante adjunto</span><strong>{{ movimiento.comprobante_nombre || movimiento.metadata.comprobante_nombre }}</strong></div></div>
+    <div class="movement-detail-row" *ngIf="movimiento.categoria || movimiento.metadata.categoria"><mat-icon>category</mat-icon><div><span>Categoría</span><strong>{{ categoriaLabel(movimiento.categoria || movimiento.metadata.categoria!) }}</strong></div></div>
+    <div class="movement-detail-row" *ngIf="movimiento.metadata.numero_comprobante"><mat-icon>receipt_long</mat-icon><div><span>Comprobante contable</span><strong>#{{ movimiento.metadata.numero_comprobante }} · {{ movimiento.metadata.codsubcuenta }}</strong></div></div>
+    <div class="movement-detail-row" *ngIf="movimiento.metadata.tipo_transaccion"><mat-icon>account_balance</mat-icon><div><span>Tipo bancario</span><strong>{{ tipoBancarioLabel(movimiento.metadata.tipo_transaccion) }}</strong></div></div>
+    <div class="movement-detail-row" *ngIf="movimiento.metadata.referencia"><mat-icon>tag</mat-icon><div><span>Referencia</span><strong>{{ movimiento.metadata.referencia }}</strong></div></div>
+    <div class="movement-detail-row" *ngIf="movimiento.impacto_saldo !== null"><mat-icon>account_balance_wallet</mat-icon><div><span>Impacto en saldo</span><strong>{{ movimiento.impacto_saldo > 0 ? '+' : '' }}{{ movimiento.impacto_saldo | number:'1.2-2' }} {{ movimiento.moneda }}</strong></div></div>
+    <div class="movement-detail-row" *ngIf="movimiento.observaciones_aprobacion"><mat-icon>chat_bubble_outline</mat-icon><div><span>Observación</span><strong>{{ movimiento.observaciones_aprobacion }}</strong></div></div>
+    <div class="movement-detail-row movement-uuid"><mat-icon>fingerprint</mat-icon><div><span>Identificador</span><code>{{ movimiento.uuid }}</code></div></div>
+  </div>
+</section>

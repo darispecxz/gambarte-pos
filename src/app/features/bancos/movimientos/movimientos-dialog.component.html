@@ -1,0 +1,105 @@
+<section class="dialog-shell">
+  <header class="dialog-header">
+    <span class="dialog-icon"><mat-icon>receipt_long</mat-icon></span>
+    <div class="dialog-heading">
+      <h2 mat-dialog-title>Movimientos bancarios</h2>
+      <p>{{ cuenta.entidad }} · Cuenta {{ cuenta.num_cuenta }} · {{ cuenta.moneda }}</p>
+    </div>
+    @if (cuentasDisponibles.length > 1) {
+      <mat-form-field class="account-select" appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Cuenta bancaria</mat-label>
+        <mat-select [ngModel]="cuenta" (ngModelChange)="cambiarCuenta($event)">
+          @for (opcion of cuentasDisponibles; track opcion.id_agencia + '-' + opcion.num_cuenta + '-' + opcion.id_moneda) {
+            <mat-option [value]="opcion">{{ opcion.num_cuenta }} · {{ opcion.moneda }} · {{ opcion.agencia }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+    <div class="header-actions" aria-label="Acciones del reporte">
+      <button mat-icon-button type="button" class="print-action" aria-label="Imprimir o guardar como PDF" title="Imprimir / Guardar PDF" (click)="imprimirReporte()" [disabled]="!movimientosVisibles.length || cargando"><mat-icon>print</mat-icon></button>
+      <button mat-icon-button type="button" class="export-action" aria-label="Exportar reporte CSV" title="Exportar reporte" (click)="exportarCsv()" [disabled]="!movimientosVisibles.length || cargando"><mat-icon>download</mat-icon></button>
+    </div>
+    <button mat-icon-button type="button" aria-label="Cerrar" (click)="cerrar()"><mat-icon>close</mat-icon></button>
+  </header>
+
+  <mat-dialog-content class="dialog-content">
+    <div class="filter-toolbar">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Desde</mat-label>
+        <input matInput type="date" [(ngModel)]="filtros.desde">
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Hasta</mat-label>
+        <input matInput type="date" [(ngModel)]="filtros.hasta">
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Tipo de movimiento</mat-label>
+        <mat-select [(ngModel)]="filtros.tipo">
+          <mat-option value="TODO">Todos</mat-option>
+          <mat-option value="ST,ET,RT">Traspasos</mat-option>
+          <mat-option value="DE,DB,SE,RB">Depósitos y retiros</mat-option>
+          <mat-option value="CC,IC">Cheques</mat-option>
+          <mat-option value="DR,SR">Remesas</mat-option>
+          <mat-option value="A,C">Apertura / Cierre</mat-option>
+          <mat-option value="TF,QC">Transferencias y QR</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <div class="filter-actions">
+        <button mat-flat-button color="primary" type="button" (click)="cargar()" [disabled]="cargando"><mat-icon>search</mat-icon> Generar</button>
+        <button mat-stroked-button type="button" (click)="limpiar()" [disabled]="cargando">Limpiar</button>
+      </div>
+    </div>
+
+    <div class="quick-ranges">
+      <span>Rango rápido:</span>
+      <button mat-button type="button" (click)="rangoRapido('hoy')">Hoy</button>
+      <button mat-button type="button" (click)="rangoRapido('semana')">Últimos 7 días</button>
+      <button mat-button type="button" (click)="rangoRapido('mes')">Este mes</button>
+    </div>
+
+    @if (totales; as resumen) {
+      <div class="report-totals">
+        <div class="total-card balance"><span>Saldo inicial · {{ fechaCorta(filtros.desde) }}</span><strong>{{ saldoPeriodo?.saldo_inicial ?? 0 | number:'1.2-2' }} {{ cuenta.moneda }}</strong></div>
+        <div class="total-card charge"><span>Cargos del período</span><strong>{{ totalesVisibles.cargos | number:'1.2-2' }} {{ cuenta.moneda }}</strong></div>
+        <div class="total-card credit"><span>Abonos del período</span><strong>{{ totalesVisibles.abonos | number:'1.2-2' }} {{ cuenta.moneda }}</strong></div>
+        <div class="total-card ending"><span>Saldo final · {{ fechaCorta(filtros.hasta) }}</span><strong>{{ saldoPeriodo?.saldo_final ?? cuenta.saldo | number:'1.2-2' }} {{ cuenta.moneda }}</strong></div>
+      </div>
+    }
+
+    @if (cargando) {
+      <div class="loading-state"><mat-spinner diameter="28"></mat-spinner><span>Generando reporte…</span></div>
+    } @else if (error) {
+      <div class="empty-state"><mat-icon>error_outline</mat-icon><span>{{ error }}</span><button mat-button type="button" (click)="cargar()">Reintentar</button></div>
+    } @else if (!movimientosVisibles.length) {
+      <div class="empty-state"><mat-icon>search_off</mat-icon><span>No hay movimientos para los filtros seleccionados.</span></div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Fecha</th><th>Movimiento</th><th>Detalle</th><th class="receipt-cell">Comprobante</th><th>Usuario</th><th class="amount">Cargo</th><th class="amount">Abono</th><th class="amount">Saldo</th></tr></thead>
+          <tbody>
+            @for (fila of movimientosVisibles; track fila.movimiento.clave + '-' + fila.movimiento.fecha + '-' + fila.movimiento.monto + '-' + $index) {
+              @let mov = fila.movimiento;
+              @let arqueo = mov.conciliacion === 'A' || mov.conciliacion === 'C';
+              <tr>
+                <td>{{ mov.fecha | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td><span class="movement-kind" [class.anchor]="arqueo">{{ arqueo ? 'Referencia de saldo' : mov.tipo }}</span></td>
+                <td>{{ mov.glosa || (arqueo ? mov.tipo : '—') }}</td>
+                <td class="receipt-cell">
+                  <button mat-icon-button type="button" class="receipt-button" [disabled]="!tieneComprobante(mov)" [attr.aria-label]="tieneComprobante(mov) ? 'Ver comprobante ' + (mov.comprobante_nombre || '') : 'Sin comprobante'" [title]="tieneComprobante(mov) ? (mov.comprobante_nombre || 'Ver comprobante') : 'Sin comprobante'" (click)="verComprobante(mov)">
+                    <mat-icon>{{ tieneComprobante(mov) ? 'attach_file' : 'remove' }}</mat-icon>
+                  </button>
+                </td>
+                <td>{{ mov.usuario || '—' }}</td>
+                <td class="amount charge">{{ !arqueo && mov.monto < 0 ? (mov.monto * -1 | number:'1.2-2') : '—' }}</td>
+                <td class="amount credit">{{ !arqueo && mov.monto >= 0 ? (mov.monto | number:'1.2-2') : '—' }}</td>
+                <td class="amount balance">{{ fila.saldo | number:'1.2-2' }} {{ cuenta.moneda }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="report-footer"><span>{{ movimientosVisibles.length }} registro(s) · Apertura y cierre son referencias de saldo, no se suman a cargos/abonos@if (reporteLimitado) { · Se alcanzó el límite de 2.000 registros }</span><span>Los saldos incluyen todos los movimientos; los filtros afectan filas y totales mostrados</span></div>
+    }
+  </mat-dialog-content>
+
+</section>

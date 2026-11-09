@@ -1,0 +1,45 @@
+<section class="denomination-capture" aria-label="Detalle de billetes y monedas">
+  <header class="denomination-heading">
+    <div>
+      <strong>{{ titulo }}</strong>
+      <small>Indica los fajos y unidades que se mueven.</small>
+    </div>
+    <div class="denomination-total" [class.matched]="coincideConMonto">
+      <small>Total contado</small>
+      <strong>{{ total | number:'1.2-2' }} {{ moneda }}</strong>
+    </div>
+  </header>
+
+  @if (loading) {
+    <div class="denomination-state">Cargando denominaciones…</div>
+  } @else if (error) {
+    <div class="denomination-state error">{{ error }}</div>
+  } @else {
+    <div class="denomination-sections">
+      @for (section of sections; track section.id) {
+        <section class="denomination-section">
+          <h3>{{ section.label }}</h3>
+          <div class="denomination-grid denomination-grid-head">
+            <span>Valor</span>
+            <span>{{ section.grupoLabel }}</span>
+            <span>Unidad</span>
+            <span>Total · {{ moneda }}</span>
+          </div>
+          @for (line of section.lines; track line.id_corte) {
+            <div class="denomination-grid denomination-row">
+              <strong>{{ line.valor | number:'1.2-2' }}</strong>
+              <input type="number" min="0" step="1" [value]="line.grupoCantidad" (input)="updateCount($event, line, 'bundle')" [attr.aria-label]="section.grupoLabel + ' de ' + line.valor">
+              <input type="number" min="0" step="1" [value]="line.unidadCantidad" (input)="updateCount($event, line, 'unit')" [attr.aria-label]="'Unidades de ' + line.valor">
+              <span>{{ line.subtotal | number:'1.2-2' }}</span>
+            </div>
+          }
+        </section>
+      }
+    </div>
+    <footer class="denomination-summary" [class.matched]="coincideConMonto" [class.mismatch]="total > 0 && !coincideConMonto">
+      <span>{{ total > 0 && !coincideConMonto ? 'El detalle no coincide con el monto' : 'Monto de la operación' }}</span>
+      <strong>{{ montoEsperado | number:'1.2-2' }} {{ moneda }}</strong>
+      <span class="summary-total">Total contado <strong>{{ total | number:'1.2-2' }} {{ moneda }}</strong></span>
+    </footer>
+  }
+</section>

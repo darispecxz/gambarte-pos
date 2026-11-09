@@ -1,0 +1,502 @@
+@use '@angular/material' as mat;
+
+@import "tailwindcss";
+
+/* Manuals keep the catalogue fixed while the reading pane scrolls independently. */
+.page:has(.manual-workspace) {
+  display: flex !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  padding: 12px 16px 24px !important;
+  box-sizing: border-box !important;
+}
+
+.page:has(.manual-workspace) > *:not(router-outlet) {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.manual-workspace {
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 4px !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+.manual-workspace .manual-layout {
+  display: grid !important;
+  grid-template-columns: 280px minmax(0, 1fr) !important;
+  align-items: stretch !important;
+  gap: 16px !important;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  margin: 0 !important;
+}
+
+.manual-workspace > .page-heading,
+.manual-workspace > .manuals-page-heading {
+  justify-self: stretch;
+  width: 100%;
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.manual-workspace .document,
+.manual-workspace .manual-document {
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  box-sizing: border-box;
+  scrollbar-color: #cbd5e1 transparent;
+  scrollbar-width: thin;
+}
+
+@media (max-width: 1100px) {
+  .manual-workspace .manual-layout { grid-template-columns: 240px minmax(0, 1fr) !important; gap: 12px !important; }
+}
+
+@media (max-width: 860px) {
+  .page:has(.manual-workspace) { padding: 8px 10px 22px !important; }
+  .manual-workspace .manual-layout { grid-template-columns: 205px minmax(0, 1fr) !important; gap: 10px !important; }
+}
+
+// ──────────────────────────────────────────────────────────────
+// Tailwind v4 preflight fix for Angular Material
+// Tailwind resets `*, ::before, ::after { border: 0 solid }`,
+// changing border-style from 'none' to 'solid'. This breaks
+// Material's notched-outline (the 3-segment border around
+// outline form fields) because MDC relies on border-style
+// being 'none' by default — when it's 'solid', internal
+// segment borders become visible as ugly vertical lines.
+// ──────────────────────────────────────────────────────────────
+.mat-mdc-form-field,
+.mat-mdc-form-field *,
+.mat-mdc-form-field *::before,
+.mat-mdc-form-field *::after {
+  border-style: none;
+}
+.mdc-notched-outline__leading {
+  border-style: solid !important;
+  border-right-style: none !important;
+}
+.mdc-notched-outline__notch {
+  border-style: solid !important;
+  border-left-style: none !important;
+  border-right-style: none !important;
+}
+.mdc-notched-outline__trailing {
+  border-style: solid !important;
+  border-left-style: none !important;
+}
+
+// Use a neutral base theme — the orange palette tints surfaces pink
+html {
+  @include mat.theme((
+    color: (
+      theme-type: light,
+      primary: mat.$orange-palette,
+      tertiary: mat.$blue-palette,
+    ),
+    typography: Roboto,
+    density: 0,
+  ));
+
+  // Override Material primary color tokens with Gambarte orange
+  --mat-sys-primary: #F58634;
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #fde8d0;
+  --mat-sys-on-primary-container: #F58634;
+
+  // Force clean white surfaces
+  --mat-sys-surface: #ffffff;
+  --mat-sys-surface-container: #ffffff;
+  --mat-sys-surface-container-low: #f8f8f8;
+  --mat-sys-surface-container-high: #f2f2f2;
+  --mat-sys-surface-container-highest: #eeeeee;
+  --mat-sys-surface-variant: #f5f5f5;
+  --mat-sys-on-surface: #373435;
+  --mat-sys-on-surface-variant: #666666;
+  --mat-sys-outline: #cccccc;
+  --mat-sys-outline-variant: #e0e0e0;
+
+  // Secondary / tertiary
+  --mat-sys-secondary: #373435;
+  --mat-sys-on-secondary: #ffffff;
+  --mat-sys-tertiary: #999899;
+  --mat-sys-error: #d32f2f;
+}
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; color: #373435; }
+
+/* Mantiene libres los pies de los drawers bancarios: los paneles flotantes del
+   shell no deben quedar por encima de sus acciones mientras están abiertos. */
+body.bank-drawer-open .bottom-panels { visibility: hidden; pointer-events: none; }
+
+/* ── Angular Material form fields (mat-form-field) ──────────────────────
+   Por defecto el campo trae ancho fijo (se ve apretado dentro de las grillas)
+   y usa la paleta base del tema. Aquí lo llevamos a ancho completo y a los
+   colores de marca: outline gris neutro y foco/etiqueta en naranja Gambarte. */
+.mat-mdc-form-field {
+  width: 100%;
+  --mdc-outlined-text-field-outline-color: #d8d8d8;
+  --mdc-outlined-text-field-hover-outline-color: #b9b9b9;
+  --mdc-outlined-text-field-focus-outline-color: #F58634;
+  --mdc-outlined-text-field-label-text-color: #8a8a8a;
+  --mdc-outlined-text-field-focus-label-text-color: #F58634;
+  --mdc-outlined-text-field-caret-color: #F58634;
+}
+.mat-mdc-form-field .mat-mdc-form-field-icon-prefix { color: #9a9a9a; padding: 0 8px 0 4px; }
+.mat-mdc-form-field .mat-mdc-form-field-icon-prefix > .mat-icon { font-size: 20px; width: 20px; height: 20px; }
+
+/* El label flotante lleva fondo de la superficie: tapa el borde superior que
+   queda detrás (en algunos casos el "notch" del outline no abre el hueco). */
+.mat-mdc-form-field .mdc-floating-label--float-above {
+  background: var(--mat-sys-surface, #ffffff);
+  padding: 0 4px;
+}
+
+/* En estado de error, el ícono de prefijo también se pone rojo. */
+.mat-mdc-form-field.mat-form-field-invalid .mat-mdc-form-field-icon-prefix,
+.mat-mdc-form-field.mat-form-field-invalid .mat-mdc-form-field-icon-prefix > .mat-icon {
+  color: var(--mat-sys-error, #d32f2f);
+}
+
+/* app-searchable-select dentro de un mat-form-field: el contenedor MDC recorta
+   con overflow:hidden, lo que cortaría el desplegable de búsqueda. Lo liberamos
+   sólo para los campos que alojan el buscador. */
+.mat-mdc-form-field:has(app-searchable-select) .mat-mdc-text-field-wrapper,
+.mat-mdc-form-field:has(app-searchable-select) .mdc-text-field {
+  overflow: visible;
+}
+
+:root {
+  --gambarte-orange: #F58634;
+  --gambarte-orange-dark: #d6711e;
+  --gambarte-orange-light: #fde8d0;
+  --gambarte-black: #373435;
+  --gambarte-gray: #999899;
+  --gambarte-gray-light: #f5f5f5;
+}
+
+/* ===== DARK MODE ===== */
+html[data-theme="dark"] {
+  --mat-sys-primary: #F58634;
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #3d2a14;
+  --mat-sys-on-primary-container: #F58634;
+
+  --mat-sys-surface: #1a1a2e;
+  --mat-sys-surface-container: #1e1e32;
+  --mat-sys-surface-container-low: #16162a;
+  --mat-sys-surface-container-high: #252540;
+  --mat-sys-surface-container-highest: #2a2a48;
+  --mat-sys-surface-variant: #252540;
+  --mat-sys-on-surface: #e2e2e8;
+  --mat-sys-on-surface-variant: #a0a0b0;
+  --mat-sys-outline: #45455a;
+  --mat-sys-outline-variant: #35354a;
+
+  --mat-sys-secondary: #c0c0d0;
+  --mat-sys-on-secondary: #1a1a2e;
+  --mat-sys-tertiary: #8888a0;
+  --mat-sys-error: #ef5350;
+
+  --gambarte-orange-light: #3d2a14;
+  --gambarte-gray-light: #252540;
+
+  color-scheme: dark;
+}
+
+html[data-theme="dark"] body {
+  background: #12121f;
+  color: #e2e2e8;
+}
+
+html[data-theme="dark"] {
+  --sidebar-bg: #0f0f1a;
+  --sidebar-text: #d0d0e0;
+  --header-bg: #1a1a2e;
+  --page-bg: #12121f;
+  --panel-bg: #1e1e32;
+  --border: #2a2a48;
+  --border-light: #252540;
+  --text-primary: #e2e2e8;
+  --text-secondary: #a0a0b0;
+  --text-muted: #6a6a80;
+  --hover-bg: #252540;
+  --card-bg: #1e1e32;
+  --card-border: #2a2a48;
+  --card-alert-bg: #2a1a1a;
+  --notif-unread-bg: #2a2510;
+  --notif-unread-hover: #3a3518;
+  --dash-text: #e2e2e8;
+  --dash-sub: #8888a0;
+  --success-bg: rgba(22,163,74,.12);
+  --success-border: rgba(22,163,74,.3);
+  --success-text: #4ade80;
+  --warning-bg: rgba(245,158,11,.12);
+  --warning-border: rgba(245,158,11,.3);
+  --warning-text: #fbbf24;
+  --error-bg: rgba(220,38,38,.12);
+  --error-border: rgba(220,38,38,.3);
+  --error-text: #f87171;
+  --info-bg: rgba(59,130,246,.12);
+  --info-border: rgba(59,130,246,.3);
+  --info-text: #60a5fa;
+  --orange-bg: rgba(245,134,52,.12);
+  --orange-border: rgba(245,134,52,.3);
+}
+
+html[data-theme="light"] {
+  --sidebar-bg: #252a32;
+  --sidebar-text: #e6ebf5;
+  --header-bg: #fff;
+  --page-bg: #fafafa;
+  --panel-bg: #fff;
+  --border: #e5e7eb;
+  --border-light: #f1f5f9;
+  --text-primary: #14213d;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --hover-bg: #f3f4f6;
+  --card-bg: #fff;
+  --card-border: #e5e7eb;
+  --card-alert-bg: #fef2f2;
+  --notif-unread-bg: #fffbeb;
+  --notif-unread-hover: #fef3c7;
+  --dash-text: #14213d;
+  --dash-sub: #64748b;
+  --success-bg: #f0fdf4;
+  --success-border: #bbf7d0;
+  --success-text: #15803d;
+  --warning-bg: #fffbeb;
+  --warning-border: #fde68a;
+  --warning-text: #92400e;
+  --error-bg: #fef2f2;
+  --error-border: #fecaca;
+  --error-text: #dc2626;
+  --info-bg: #f0f9ff;
+  --info-border: #bae6fd;
+  --info-text: #0369a1;
+  --orange-bg: #fff8f0;
+  --orange-border: #fed7aa;
+}
+
+.swal2-popup.banking-notice-popup {
+  width: min(540px, calc(100vw - 32px)) !important;
+  padding: 28px 30px 24px !important;
+  border-radius: 12px !important;
+}
+.banking-notice-popup .banking-notice-title {
+  color: #4b5563;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+.banking-notice-popup .banking-notice-confirm {
+  min-width: 96px;
+  padding: 11px 22px;
+  border-radius: 7px;
+  font-weight: 700;
+}
+
+.swal2-popup.remesa-payment-popup {
+  width: min(560px, calc(100vw - 28px)) !important;
+  padding: 22px 24px 18px !important;
+  border-radius: 14px !important;
+}
+.remesa-payment-popup .remesa-payment-title {
+  margin: 0 0 10px;
+  color: #14213d;
+  font-size: 20px;
+  font-weight: 750;
+  text-align: left;
+}
+.remesa-payment-popup .remesa-payment-html {
+  margin: 0 !important;
+  padding: 0 !important;
+  text-align: left;
+}
+.remesa-confirm-content { display: flex; flex-direction: column; gap: 10px; }
+.remesa-confirm-intro {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+  border: 1px solid #ffdfc5; border-radius: 9px; background: #fff7ef;
+  color: #52627a; font-size: 13px; text-align: left;
+}
+.remesa-confirm-intro .material-icons {
+  display: grid; place-items: center; width: 32px; height: 32px; flex: 0 0 32px;
+  border-radius: 8px; background: #ffead8; color: #e87520; font-size: 19px;
+}
+.remesa-confirm-list { display: flex; flex-direction: column; gap: 6px; }
+.remesa-confirm-row {
+  display: grid; grid-template-columns: 28px minmax(110px, .8fr) minmax(0, 1.4fr);
+  align-items: center; gap: 9px; min-height: 40px; padding: 6px 10px;
+  border: 1px solid #e5edf5; border-radius: 8px; background: #fff; text-align: left;
+}
+.remesa-confirm-icon { display: grid; place-items: center; color: #8b9bb2; }
+.remesa-confirm-icon .material-icons { font-size: 18px; }
+.remesa-confirm-label { color: #52627a; font-size: 12px; }
+.remesa-confirm-value { color: #1d2d49; font-size: 12px; font-weight: 700; text-align: right; overflow-wrap: anywhere; }
+.remesa-confirm-total {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  min-height: 54px; padding: 10px 14px; border-radius: 9px;
+  background: #f58220; color: #fff;
+}
+.remesa-confirm-total > span { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; }
+.remesa-confirm-total .material-icons { font-size: 18px; }
+.remesa-confirm-total > strong { font-size: 19px; font-weight: 800; white-space: nowrap; }
+.remesa-payment-popup .remesa-payment-actions { gap: 10px; margin-top: 12px; }
+.remesa-payment-popup .remesa-payment-confirm,
+.remesa-payment-popup .remesa-payment-cancel {
+  min-width: 106px; min-height: 42px; padding: 0 18px; border-radius: 8px;
+  font-size: 13px; font-weight: 700;
+}
+.remesa-payment-popup .remesa-payment-confirm { background: #f58220 !important; }
+.remesa-payment-popup .remesa-payment-cancel { background: #fff !important; color: #41536f !important; border: 1px solid #d7e0ea !important; }
+
+@media (max-width: 560px) {
+  .swal2-popup.remesa-payment-popup { padding: 18px 14px 14px !important; }
+  .remesa-confirm-row { grid-template-columns: 24px minmax(88px, .75fr) minmax(0, 1.25fr); gap: 6px; padding: 6px 7px; }
+  .remesa-confirm-total > strong { font-size: 16px; }
+}
+
+.giro-route-flow { display:grid; grid-template-columns:minmax(0,1fr) 34px minmax(0,1fr); gap:12px; align-items:center; margin-bottom:14px; }
+.giro-route-card { min-width:0; min-height:86px; box-sizing:border-box; display:flex; align-items:flex-start; gap:11px; padding:13px 14px; border:1px solid #cfe0ff; border-radius:11px; background:#f5f9ff; }
+.giro-route-destination { border-color:#bce8d6; background:#f2fbf7; }
+.giro-route-icon { width:35px; height:35px; flex:0 0 auto; display:grid; place-items:center; border-radius:9px; color:#2864ae; background:#e4efff; }
+.giro-route-destination .giro-route-icon { color:#14805e; background:#ddf4e9; }
+.giro-route-icon mat-icon { font-size:19px; width:19px; height:19px; }
+.giro-route-card > div { min-width:0; display:flex; flex-direction:column; gap:4px; }
+.giro-route-card small { color:#8192aa; font-size:.68rem; font-weight:700; text-transform:uppercase; }
+.giro-route-card strong { color:#193452; font-size:.82rem; line-height:1.35; overflow-wrap:anywhere; }
+.giro-route-card span { color:#7186a3; font-size:.72rem; }
+.route-flag { margin-right:4px; font-size:.9rem; font-weight:400; }
+.giro-route-arrow { justify-self:center; color:#e1782b; }
+.devolución-banner { border-color:#fed7aa; background:#fff8f1; }
+.devolución-banner > .giro-estado { margin:0; }
+@media (max-width:600px) {
+  .giro-route-flow { grid-template-columns:minmax(0,1fr) 22px minmax(0,1fr); gap:5px; }
+  .giro-route-card { padding:10px 8px; gap:7px; }
+  .giro-route-card strong { font-size:.72rem; }
+  .giro-route-card span { font-size:.65rem; }
+}
+
+/* Link to the embedded cashier manual */
+.head-actions { display:flex; align-items:center; justify-content:flex-end; gap:10px; flex-wrap:wrap; }
+.manual-trigger { min-height:42px; display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:0 14px; border:1px solid #d9e4f1; border-radius:9px; background:#fff; color:#285f9f; font-family:inherit; font-size:12px; font-weight:600; cursor:pointer; box-shadow:0 1px 2px rgba(19,45,77,.04); }
+.manual-trigger:hover { border-color:#9abce2; background:#f4f8fd; }
+
+@media print {
+  mat-sidenav, .sidebar, .top, header.top { display: none !important; }
+  mat-sidenav-content { margin-left: 0 !important; }
+}
+
+/* Printable embedded manuals: keep the guide itself, omit navigation and app chrome. */
+@media print {
+  @page {
+    size: A4;
+    margin: 24mm 12mm 12mm;
+
+    @top-left {
+      content: "";
+      width: 38mm;
+      height: 12mm;
+      background-image: url('/assets/gambarte-logo.png');
+      background-repeat: no-repeat;
+      background-position: left center;
+      background-size: contain;
+    }
+
+    @top-right {
+      content: var(--manual-generated-date, "");
+      color: #52657d;
+      font: 600 8pt Arial, sans-serif;
+      vertical-align: middle;
+    }
+  }
+  html, body, app-root, app-shell, .app, .main, mat-sidenav-container, mat-sidenav-content, .mat-drawer-content {
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: #fff !important;
+  }
+  body * { visibility: hidden !important; }
+  .manual-workspace, .manual-workspace * { visibility: visible !important; }
+  .page:has(.manual-workspace) {
+    display: block !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    flex: none !important;
+  }
+  .page:has(.manual-workspace) > * {
+    display: block !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  .manual-workspace {
+    position: static !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    background: #fff !important;
+    color: #14213d !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .manual-workspace .manual-layout { display: block !important; height: auto !important; min-height: 0 !important; overflow: visible !important; }
+  .manual-workspace app-manuales-indice { display: none !important; }
+  .manual-workspace .manuals-index { display: none !important; }
+  .manual-workspace .manual-document,
+  .manual-workspace .document { width: 100% !important; max-width: none !important; height: auto !important; max-height: none !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
+  .manual-workspace .ui-capture,
+  .manual-workspace figure,
+  .manual-workspace section,
+  .manual-workspace table,
+  .manual-workspace .visual-card { break-inside: avoid; page-break-inside: avoid; }
+  /* These guides begin with long instructional blocks. Let those blocks flow
+     onto the first sheet instead of moving the whole section to the next one. */
+  .manual-opening-workspace .interface-guide,
+  .manual-opening-workspace .steps-section,
+  .manual-opening-workspace .success-check,
+  .manual-banks-workspace figure.visual-card,
+  .manual-banks-workspace .steps,
+  .manual-banks-workspace .success {
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+  }
+  .manual-workspace .ui-capture { overflow: visible !important; }
+  .manual-workspace a { color: inherit !important; text-decoration: none !important; }
+}

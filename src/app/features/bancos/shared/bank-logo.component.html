@@ -1,0 +1,13 @@
+@if (src) {
+  <div class="bl-logo" [style.width.px]="size" [style.height.px]="size">
+    <img [src]="src" [alt]="entidad">
+  </div>
+} @else {
+  <div class="bl-fallback" [style.width.px]="size" [style.height.px]="size">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round" [attr.width]="size * 0.45" [attr.height]="size * 0.45">
+      <path d="M3 21h18"/><path d="M5 21V8l7-5 7 5v13"/>
+      <line x1="9" y1="21" x2="9" y2="12"/><line x1="15" y1="21" x2="15" y2="12"/>
+    </svg>
+  </div>
+}

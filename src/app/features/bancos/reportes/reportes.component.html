@@ -1,0 +1,47 @@
+<div class="b-head">
+  <div class="b-head-icon">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+  </div>
+  <div class="b-head-text"><h2>Reportes</h2><span>Resumen de posición bancaria de tu agencia</span></div>
+  <div class="b-head-actions">
+    <button class="b-btn b-btn-outline b-btn-sm" (click)="recargar()">Actualizar</button>
+    <button class="b-btn b-btn-primary b-btn-sm" [disabled]="!store.cuentas().length" (click)="exportarCsv()">Exportar CSV</button>
+  </div>
+</div>
+
+<div class="b-kpis">
+  <div class="b-kpi"><div class="b-kpi-icon i-total"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+    <div class="b-kpi-data"><span class="b-kpi-val">{{ store.cuentas().length }}</span><span class="b-kpi-lbl">Cuentas</span></div></div>
+  <div class="b-kpi"><div class="b-kpi-icon i-pending"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><line x1="3" y1="5" x2="21" y2="5"/><polyline points="7 23 3 19 7 15"/><line x1="21" y1="19" x2="3" y2="19"/></svg></div>
+    <div class="b-kpi-data"><span class="b-kpi-val">{{ pendientes }}</span><span class="b-kpi-lbl">Traspasos pendientes</span></div></div>
+  <div class="b-kpi"><div class="b-kpi-icon i-open"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+    <div class="b-kpi-data"><span class="b-kpi-val">{{ chequesCirc }}</span><span class="b-kpi-lbl">Cheques en circulación</span></div></div>
+  <div class="b-kpi"><div class="b-kpi-icon i-closed"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+    <div class="b-kpi-data"><span class="b-kpi-val">{{ chequesRecibir }}</span><span class="b-kpi-lbl">Cheques por recibir</span></div></div>
+</div>
+
+<div class="b-card">
+  <div class="b-card-head"><h3>Saldos por entidad y moneda</h3></div>
+  @if (!filas.length) { <div class="b-empty">Sin cuentas para resumir.</div> }
+  @else {
+    <div class="b-table-wrap"><table class="b-table">
+      <thead><tr><th>Entidad</th><th class="b-r">Cuentas</th>@for (m of monedas; track m) { <th class="b-r">{{ m }}</th> }</tr></thead>
+      <tbody>
+        @for (f of filas; track f.entidad) {
+          <tr>
+            <td><div style="display:flex;align-items:center;gap:10px"><app-bank-logo [entidad]="f.entidad" [size]="34"></app-bank-logo><span class="b-strong">{{ f.entidad }}</span></div></td>
+            <td class="b-r">{{ f.cuentas }}</td>
+            @for (m of monedas; track m) { <td class="b-r b-strong" [class.b-neg]="(f.porMoneda[m] || 0) < 0">{{ f.porMoneda[m] != null ? (f.porMoneda[m] | number:'1.2-2') : '—' }}</td> }
+          </tr>
+        }
+      </tbody>
+      <tfoot>
+        <tr>
+          <td class="b-strong">Total</td><td class="b-r b-strong">{{ store.cuentas().length }}</td>
+          @for (m of monedas; track m) { <td class="b-r b-strong">{{ totalMoneda(m) | number:'1.2-2' }}</td> }
+        </tr>
+      </tfoot>
+    </table></div>
+  }
+  <div class="b-note">Los reportes detallados de conciliación bancaria están en el módulo de Contabilidad.</div>
+</div>

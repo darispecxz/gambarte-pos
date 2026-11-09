@@ -1,0 +1,234 @@
+<main class="manual-page manual-workspace">
+  <header class="page-heading">
+    <span class="heading-icon">⇢</span>
+    <div><small>MANUALES DEL SISTEMA · PAGO DE REMESAS</small><h1>Guía de {{ titulo }}</h1><p>{{ descripcion }}</p></div>
+    <app-manuales-imprimir></app-manuales-imprimir>
+  </header>
+
+  <div class="layout manual-layout">
+    <app-manuales-indice></app-manuales-indice>
+
+    <article class="document">
+      <div class="doc-top"><span>PAGO DE REMESAS</span><span>Guía paso a paso</span></div>
+      <h2>{{ titulo }}</h2>
+      @if (guia === 'efectivo') {
+        <p class="intro">Usa esta opción cuando la remesa corresponda a pago en efectivo. Busca el código, valida que esté pendiente y entrega el monto exacto al beneficiario identificado.</p>
+        <section class="notice"><b>Antes de empezar</b><span>Confirma que estás en la agencia de destino correcta. Solo se puede pagar una remesa pendiente; revisa código, moneda, importe y datos del beneficiario antes de confirmar.</span></section>
+
+        <section class="guide">
+          <h3>1. Encuentra la remesa pendiente</h3>
+          <p class="guide-intro">Busca por código o por nombre del remitente o beneficiario. Comprueba la fila antes de abrirla.</p>
+          <figure class="visual-card">
+            <figcaption><span class="step-number">01</span><span><b>Filtra la lista de remesas</b><small>La pantalla muestra únicamente remesas disponibles para pagar en esta agencia.</small></span></figcaption>
+            <div class="screen">
+              <div class="screen-heading"><span class="screen-icon orange">◎</span><span><b>Pago en Efectivo</b><small>Pago de remesas Chile a Bolivia</small></span><span class="count-badge">2 pendientes</span></div>
+              <div class="filter-row">
+                <div class="annotated"><em>1 · Código de remesa</em><svg viewBox="0 0 24 28" aria-hidden="true"><path d="M12 1v21m0 0-6-7m6 7 6-7"/></svg><div class="control">#　Código de remesa　　80672</div></div>
+                <div class="annotated wide"><em>2 · Nombre para localizar al cliente</em><svg viewBox="0 0 24 28" aria-hidden="true"><path d="M12 1v21m0 0-6-7m6 7 6-7"/></svg><div class="control">⌕　Remitente o beneficiario</div></div>
+                <div class="annotated"><em>3 · Ejecuta la búsqueda</em><svg viewBox="0 0 24 28" aria-hidden="true"><path d="M12 1v21m0 0-6-7m6 7 6-7"/></svg><button class="primary">⌕　Buscar</button></div>
+              </div>
+              <div class="table-head cash-table"><span>Código</span><span>Estado</span><span>Beneficiario</span><span>Remitente</span><span>Monto</span><span>Fecha envío</span><span></span></div>
+              <div class="table-row cash-table"><strong>80672</strong><span class="badge amber">Pendiente</span><b>MARÍA LÓPEZ</b><span>JUAN PÉREZ</span><strong>540,00 BOB</strong><span>06/11/2026 09:15</span><span class="muted">›</span></div>
+              <p class="caption"><i>1–3</i> Ingresa el código o un nombre y pulsa Buscar. Confirma que el estado diga <b>Pendiente</b> y que el monto y el beneficiario correspondan a la persona presente.</p>
+            </div>
+          </figure>
+        </section>
+
+        <section class="guide">
+          <h3>2. Abre la remesa y valida la identidad</h3>
+          <figure class="visual-card">
+            <figcaption><span class="step-number">02</span><span><b>Revisa remitente, destinatario y documento</b><small>La pantalla muestra la ruta Chile → Bolivia y la información registrada en el envío.</small></span></figcaption>
+            <div class="screen">
+              <div class="operation-header"><b>Datos de la Operación</b><span class="badge amber">PENDIENTE</span></div>
+              <div class="route-grid">
+                <div class="route-box origin"><small>REMITENTE</small><b>JUAN PÉREZ GONZÁLEZ</b><span>🇨🇱　AGENCIA DE ORIGEN</span></div>
+                <span class="route-arrow">➜</span>
+                <div class="route-box destination"><small>DESTINATARIO</small><b>MARÍA LÓPEZ FLORES</b><span>🇧🇴　AGENCIA DE DESTINO</span></div>
+              </div>
+              <div class="document-row"><b>Documento del beneficiario</b><span>Tipo de documento　CÉDULA DE IDENTIDAD</span><span>Número　CIB 4312725</span><span>Expedición　CHUQUISACA</span></div>
+              <div class="summary-card">
+                <div class="summary-title"><strong>540,00 BOB</strong><span>El beneficiario recibe en Bolivia</span><small>Remesa #80672</small></div>
+                <div class="summary-cols"><span>BENEFICIARIO<b>MARÍA LÓPEZ FLORES</b></span><span>FORMA DE PAGO<b>Efectivo por ventanilla</b></span><span>FECHA Y HORA DE ENVÍO<b>06/11/2026 09:15</b></span></div>
+                <div class="summary-total"><span>Total a entregar al beneficiario</span><b>540,00 BOB</b></div>
+              </div>
+              <div class="annotated action-target"><em>1 · Continúa solo después de cotejar identidad, código e importe</em><svg viewBox="0 0 24 28" aria-hidden="true"><path d="M12 1v21m0 0-6-7m6 7 6-7"/></svg><button class="primary action-button">▣　Pagar en efectivo</button></div>
+              <p class="caption">Compara el documento presentado con los datos del destinatario. Si el estado no es Pendiente o los datos no coinciden, detén el pago y consulta a tu responsable.</p>
+            </div>
+          </figure>
+        </section>
+
+        <section class="guide">
+          <h3>3. Confirma el pago</h3>
+          <figure class="visual-card">
+            <figcaption><span class="step-number">03</span><span><b>Lee el resumen antes de entregar efectivo</b><small>La confirmación registra el pago de forma definitiva.</small></span></figcaption>
+            <div class="screen confirm-preview">
+              <div class="confirm-title"><span class="screen-icon orange">▣</span><div><b>Confirmar pago de remesa</b><small>Revisa los datos antes de confirmar el pago.</small></div></div>
+              <div class="confirm-row"><span>Código de remesa</span><b>80672</b></div><div class="confirm-row"><span>Beneficiario</span><b>MARÍA LÓPEZ FLORES</b></div><div class="confirm-row"><span>Agencia destino</span><b>AGENCIA 6 DE MARZO</b></div><div class="confirm-row"><span>Forma de pago</span><b>Efectivo por ventanilla</b></div><div class="confirm-row"><span>Moneda</span><b>BOB</b></div><div class="confirm-row"><span>Fecha y hora de envío</span><b>06/11/2026 09:15</b></div>
+              <div class="confirm-total"><span>▣　Total a entregar al beneficiario</span><b>540,00 BOB</b></div>
+              <div class="button-row"><button class="outline">Cancelar</button><span class="annotated"><em>2 · Registra el pago después de verificar</em><svg viewBox="0 0 24 28" aria-hidden="true"><path d="M12 1v21m0 0-6-7m6 7 6-7"/></svg><button class="primary">Confirmar pago</button></span></div>
+              <p class="caption"><i>1</i> Comprueba todos los datos y el total. <i>2</i> Pulsa Confirmar pago únicamente después de entregar el efectivo al beneficiario correcto.</p>
+            </div>
+          </figure>
+        </section>
+
+        <section class="guide">
+          <h3>4. Entrega el comprobante</h3>
+          <figure class="visual-card">
+            <figcaption><span class="step-number">04</span><span><b>Comprueba el resultado y conserva el respaldo</b><small>El sistema muestra el resultado del pago y habilita las acciones posteriores.</small></span></figcaption>
+            <div class="screen success-screen"><span class="success-icon">✓</span><div><b>Remesa pagada</b><small>Código 80672 · 540,00 BOB</small></div><span class="badge green">PAGADO</span></div>
+            <div class="action-grid">
+              <div class="annotated"><em>1 · Imprime o guarda el comprobante</em><svg viewBox="0 0 24 28" aria-hidden="true"><path d="M12 1v21m0 0-6-7m6 7 6-7"/></svg><button class="outline full">▤　Comprobante PDF</button></div>
+              <div class="annotated"><em>2 · Adjunta la boleta firmada si corresponde</em><svg viewBox="0 0 24 28" aria-hidden="true"><path d="M12 1v21m0 0-6-7m6 7 6-7"/></svg><div class="upload-control">＋　Boleta de pago firmada <small>PDF, JPG o PNG · máx. 5 MB · opcional</small></div></div>
+              <div class="annotated"><em>3 · Continúa con el siguiente cliente</em><svg viewBox="0 0 24 28" aria-hidden="true"><path d="M12 1v21m0 0-6-7m6 7 6-7"/></svg><button class="primary full">Nuevo pago</button></div>
+            </div>
+            <p class="caption">El estado debe quedar como Pagado. Guarda o imprime el comprobante y carga la boleta firmada solo cuando la tengas disponible.</p>
+          </figure>
+        </section>
+      }
+
+      @if (guia === 'deposito') {
+        <p class="intro">El depósito tiene dos momentos: se registra desde la agencia y queda En proceso; después, confirma la acreditación cuando verifiques el abono en la cuenta del beneficiario.</p>
+        <section class="notice"><b>Antes de empezar</b><span>Valida que la remesa incluya datos bancarios del beneficiario. Selecciona la cuenta operativa de Gambarte que recibirá el débito contable. No confirmes la acreditación hasta comprobarla en el banco.</span></section>
+
+        <section class="guide">
+          <h3>1. Busca la remesa en Pendientes por preparar</h3>
+          <figure class="visual-card">
+            <figcaption><span class="step-number">01</span><span><b>Filtra y selecciona los depósitos pendientes</b><small>La pestaña En proceso contiene depósitos registrados que esperan acreditación.</small></span></figcaption>
+            <div class="screen">
+              <div class="screen-heading"><span class="screen-icon orange">◎</span><span><b>Pago por Depósito</b><small>Pago de remesas Chile a Bolivia</small></span></div>
+              <div class="filter-row">
+                <div class="annotated"><em>1 · Busca por código</em><svg viewBox="0 0 24 28" aria-hidden="true"><path d="M12 1v21m0 0-6-7m6 7 6-7"/></svg><div class="control">#　Código　　80672</div></div>
+                <div class="annotated wide"><em>2 · O por nombres de remitente o beneficiario</em><svg viewBox="0 0 24 28" aria-hidden="true"><path d="M12 1v21m0 0-6-7m6 7 6-7"/></svg><div class="control">⌕　Remitente o beneficiario</div></div>
+                <div class="annotated"><em>3 · Busca las remesas</em><svg viewBox="0 0 24 28" aria-hidden="true"><path d="M12 1v21m0 0-6-7m6 7 6-7"/></svg><button class="primary">⌕　Buscar</button></div>
+              </div>
+              <div class="annotated tabs-target"><em>4 · Deja activa esta pestaña para registrar un depósito</em><svg viewBox="0 0 24 28" aria-hidden="true"><path d="M12 1v21m0 0-6-7m6 7 6-7"/></svg><div class="tabs"><span class="selected">Pendientes por preparar</span><span>En proceso</span></div></div>
+              <div class="table-head deposit-table"><span><input type="checkbox" disabled></span><span>Código</span><span>Estado</span><span>Beneficiario</span><span>Banco / cuenta</span><span>Monto</span><span></span></div>
+              <div class="table-row deposit-table"><span><input type="checkbox" disabled></span><strong>80672</strong><span class="badge amber">Pendiente</span><b>MARÍA LÓPEZ</b><span>BANCO BCP · 50151221054</span><strong>540,00 BOB</strong><span>›</span></div>
+              <p class="caption">Marca una remesa pendiente o abre su fila. Si seleccionas varias, el botón Preparar depósitos inicia el lote; revisa cada cuenta y monto antes de procesar.</p>
+            </div>
+          </figure>
+        </section>
+
+        <section class="guide">
+          <h3>2. Elige la cuenta operativa de la agencia</h3>
+          <figure class="visual-card">
+            <figcaption><span class="step-number">02</span><span><b>Verifica la ruta y selecciona una cuenta de la moneda correcta</b><small>El banco y la cuenta del beneficiario son los datos de destino; la cuenta operativa corresponde a Gambarte.</small></span></figcaption>
+            <div class="screen">
+              <div class="route-grid"><div class="route-box origin"><small>REMITENTE</small><b>JUAN PÉREZ GONZÁLEZ</b><span>🇨🇱　AGENCIA DE ORIGEN</span></div><span class="route-arrow">➜</span><div class="route-box destination"><small>DESTINATARIO</small><b>MARÍA LÓPEZ FLORES</b><span>🇧🇴　AGENCIA DE DESTINO</span></div></div>
+              <div class="beneficiary-account"><span>Banco del beneficiario</span><b>BANCO BCP</b><span>Cuenta del beneficiario</span><b>50151221054</b></div>
+              <div class="field-grid two">
+                <div class="annotated"><em>1 · Escoge la moneda asociada a la cuenta</em><svg viewBox="0 0 24 28" aria-hidden="true"><path d="M12 1v21m0 0-6-7m6 7 6-7"/></svg><div class="control">Moneda de la cuenta　BOB ⌄</div></div>
+                <div class="annotated"><em>2 · Selecciona una cuenta operativa activa</em><svg viewBox="0 0 24 28" aria-hidden="true"><path d="M12 1v21m0 0-6-7m6 7 6-7"/></svg><div class="control invalid">Cuenta operativa de la agencia　Seleccione una cuenta ⌄</div><small class="error">Selecciona la cuenta operativa para registrar el depósito.</small></div>
+              </div>
+              <div class="summary-card"><div class="summary-title"><strong>540,00 BOB</strong><span>Total a pagar al beneficiario</span><small>Remesa #80672</small></div><div class="summary-cols"><span>FORMA DE PAGO<b>Depósito bancario</b></span><span>FECHA Y HORA DE ENVÍO<b>06/11/2026 09:15</b></span><span>CUENTA OPERATIVA<b>La seleccionada en el formulario</b></span></div></div>
+              <p class="caption">La lista solo ofrece cuentas operativas compatibles con la moneda elegida. Si el banco o la cuenta destino de la remesa no están informados, detén el proceso y consulta antes de registrar.</p>
+            </div>
+          </figure>
+        </section>
+
+        <section class="guide">
+          <h3>3. Registra el depósito y espera la acreditación</h3>
+          <figure class="visual-card">
+            <figcaption><span class="step-number">03</span><span><b>Confirma el resumen y registra el movimiento</b><small>El depósito queda en proceso; el registro por sí solo no acredita el pago en la cuenta del beneficiario.</small></span></figcaption>
+            <div class="screen confirm-preview">
+              <div class="confirm-title"><span class="screen-icon orange">▤</span><div><b>Confirmar pago de remesa</b><small>Comprueba cuenta, beneficiario y monto.</small></div></div>
+              <div class="confirm-row"><span>Beneficiario</span><b>MARÍA LÓPEZ FLORES</b></div><div class="confirm-row"><span>Entidad financiera / cuenta destino</span><b>BANCO BCP · 50151221054</b></div><div class="confirm-row"><span>Cuenta operativa de la agencia</span><b>BANCO BISA · 6942240013</b></div><div class="confirm-row"><span>Forma de pago</span><b>Depósito bancario</b></div>
+              <div class="confirm-total"><span>Total a pagar al beneficiario</span><b>540,00 BOB</b></div>
+              <div class="button-row"><button class="outline">Cancelar</button><span class="annotated"><em>1 · Registra el depósito en la cuenta seleccionada</em><svg viewBox="0 0 24 28" aria-hidden="true"><path d="M12 1v21m0 0-6-7m6 7 6-7"/></svg><button class="primary">Registrar depósito</button></span></div>
+              <p class="caption">Tras registrar, revisa el resultado y deja la remesa en estado En proceso. Conserva la referencia y el comprobante de la transferencia.</p>
+            </div>
+          </figure>
+        </section>
+
+        <section class="guide">
+          <h3>4. Confirma solo cuando el abono esté acreditado</h3>
+          <figure class="visual-card">
+            <figcaption><span class="step-number">04</span><span><b>Busca el registro en la pestaña En proceso</b><small>Verifica banco, número de cuenta, cajero y tiempo transcurrido.</small></span></figcaption>
+            <div class="screen">
+              <div class="tabs"><span>Pendientes por preparar</span><span class="selected">En proceso</span></div>
+              <div class="table-head process-table"><span>Código</span><span>Beneficiario</span><span>Banco / cuenta</span><span>Cajero</span><span>Tiempo</span><span>Monto</span><span></span></div>
+              <div class="table-row process-table"><strong>80672</strong><b>MARÍA LÓPEZ</b><span>BANCO BCP · 50151221054</span><span>cajero1</span><span>12 min</span><strong>540,00 BOB</strong><span class="badge blue">En proceso</span></div>
+              <div class="annotated action-target"><em>1 · Confirma después de ver el abono en el banco</em><svg viewBox="0 0 24 28" aria-hidden="true"><path d="M12 1v21m0 0-6-7m6 7 6-7"/></svg><button class="outline confirm-deposit">✓　Confirmar depósito</button></div>
+              <p class="caption">No confirmes por haber enviado la transferencia solamente. Comprueba que el dinero esté acreditado en la cuenta de destino y corresponde al mismo beneficiario e importe.</p>
+            </div>
+          </figure>
+        </section>
+
+        <section class="guide">
+          <h3>5. Revisa la confirmación de acreditación</h3>
+          <figure class="visual-card">
+            <figcaption><span class="step-number">05</span><span><b>Valida el diálogo de confirmación</b><small>El resumen distingue el total pagado del monto que se debe acreditar.</small></span></figcaption>
+            <div class="screen confirm-preview">
+              <div class="confirm-title"><span class="screen-icon orange">⌂</span><div><b>Confirmar depósito acreditado</b><small>Verifica los datos y confirma que el depósito fue acreditado.</small></div></div>
+              <div class="confirm-row"><span>Código de remesa</span><b>80672</b></div><div class="confirm-row"><span>Beneficiario</span><b>MARÍA LÓPEZ FLORES · BANCO BCP</b></div><div class="confirm-row"><span>Agencia destino</span><b>AGENCIA 6 DE MARZO</b></div><div class="confirm-row"><span>Entidad financiera</span><b>BANCO BCP</b></div><div class="confirm-row"><span>Cuenta de destino</span><b>50151221054</b></div><div class="confirm-row"><span>Fecha y hora de envío</span><b>06/11/2026 09:15</b></div>
+              <div class="confirm-total"><span>Total a pagar al beneficiario</span><b>540,00 BOB</b></div>
+              <div class="button-row"><button class="outline">Cancelar</button><span class="annotated"><em>2 · Cierra el flujo al confirmar la acreditación</em><svg viewBox="0 0 24 28" aria-hidden="true"><path d="M12 1v21m0 0-6-7m6 7 6-7"/></svg><button class="primary green-button">Confirmar depósito</button></span></div>
+              <p class="caption">Al confirmar, la remesa deja En proceso y queda pagada. Si no encuentras el abono, cancela el diálogo y verifica la operación bancaria.</p>
+            </div>
+          </figure>
+        </section>
+      }
+
+      @if (guia === 'reporte') {
+        <p class="intro">El reporte consulta pagos y depósitos por periodo. Los filtros se aplican al pulsar Buscar; desde los resultados puedes abrir el detalle y consultar comprobantes.</p>
+        <section class="notice"><b>Antes de empezar</b><span>El reporte inicia con la fecha de hoy. Comprueba el rango Desde/Hasta y considera que filtros amplios pueden devolver más registros.</span></section>
+
+        <section class="guide">
+          <h3>1. Define los filtros del reporte</h3>
+          <figure class="visual-card">
+            <figcaption><span class="step-number">01</span><span><b>Limita la búsqueda al periodo y criterio requerido</b><small>Los campos reflejan los filtros disponibles en Reportes de pago de remesas.</small></span></figcaption>
+            <div class="screen report-screen">
+              <div class="screen-heading"><span class="screen-icon orange">▤</span><span><b>Reportes de pago de remesas</b><small>Consulta pagos en efectivo y depósitos registrados.</small></span></div>
+              <div class="report-filters">
+                <div class="annotated"><em>1 · Fecha inicial</em><svg viewBox="0 0 24 28" aria-hidden="true"><path d="M12 1v21m0 0-6-7m6 7 6-7"/></svg><div class="control">Desde　06/11/2026</div></div>
+                <div class="annotated"><em>2 · Fecha final</em><svg viewBox="0 0 24 28" aria-hidden="true"><path d="M12 1v21m0 0-6-7m6 7 6-7"/></svg><div class="control">Hasta　06/11/2026</div></div>
+                <div class="annotated"><em>3 · Estado del pago</em><svg viewBox="0 0 24 28" aria-hidden="true"><path d="M12 1v21m0 0-6-7m6 7 6-7"/></svg><div class="control">Estado　Todos ⌄</div></div>
+                <div class="annotated"><em>4 · Modalidad</em><svg viewBox="0 0 24 28" aria-hidden="true"><path d="M12 1v21m0 0-6-7m6 7 6-7"/></svg><div class="control">Forma de pago　Todos ⌄</div></div>
+                <div class="annotated"><em>5 · Código opcional</em><svg viewBox="0 0 24 28" aria-hidden="true"><path d="M12 1v21m0 0-6-7m6 7 6-7"/></svg><div class="control">Código　Ej. 80672</div></div>
+                <div class="annotated"><em>6 · Ejecuta la consulta</em><svg viewBox="0 0 24 28" aria-hidden="true"><path d="M12 1v21m0 0-6-7m6 7 6-7"/></svg><button class="primary">⌕　Buscar</button></div>
+              </div>
+              <p class="caption"><i>1–2</i> Define el periodo; Hasta no puede ser anterior a Desde. <i>3–5</i> Acota por estado, efectivo/depósito o código. <i>6</i> Pulsa Buscar para cargar el reporte.</p>
+            </div>
+          </figure>
+        </section>
+
+        <section class="guide">
+          <h3>2. Busca y revisa los resultados</h3>
+          <figure class="visual-card">
+            <figcaption><span class="step-number">02</span><span><b>Filtra las filas y abre el detalle necesario</b><small>Los resultados permiten revisar estado, beneficiario, monto y fecha de pago.</small></span></figcaption>
+            <div class="screen report-screen">
+              <div class="annotated search-target"><em>1 · Busca en la tabla por nombre, código o documento</em><svg viewBox="0 0 24 28" aria-hidden="true"><path d="M12 1v21m0 0-6-7m6 7 6-7"/></svg><div class="control">⌕　Buscar en resultados</div></div>
+              <div class="table-head report-table"><span>Código</span><span>Fecha envío</span><span>Beneficiario</span><span>Documento</span><span>Origen</span><span>Mon.</span><span>Monto</span><span>Estado</span><span>Fecha pago</span><span>Detalle</span></div>
+              <div class="table-row report-table"><strong>80672</strong><span>06/11/2026 09:15</span><b>MARÍA LÓPEZ FLORES</b><span>CIB 4312725</span><span>SCL</span><span>BOB</span><strong>540,00</strong><span class="badge green">Pagado</span><span>06/11/2026 09:22</span><span class="annotated"><em>2 · Abre el drawer de detalle</em><svg viewBox="0 0 24 28" aria-hidden="true"><path d="M12 1v21m0 0-6-7m6 7 6-7"/></svg><button class="icon-button">◉</button></span></div>
+              <div class="detail-drawer-preview"><div class="drawer-title"><span>↓</span><b>Detalle de remesa · #80672</b><span class="badge green">Pagado</span></div><div class="drawer-columns"><span>MONTO<b>540,00 BOB</b></span><span>FECHA ENVÍO<b>06/11/2026 09:15</b></span><span>FORMA DE PAGO<b>Efectivo</b></span><span>BENEFICIARIO<b>MARÍA LÓPEZ FLORES</b></span><span>ESTADO<b>Pagado</b></span></div><div class="annotated drawer-action"><em>3 · Consulta el comprobante cuando exista</em><svg viewBox="0 0 24 28" aria-hidden="true"><path d="M12 1v21m0 0-6-7m6 7 6-7"/></svg><button class="outline">▤　Comprobante PDF</button></div></div>
+              <p class="caption">El drawer muestra los datos de la remesa, la modalidad y el estado. Usa el botón de comprobante si el registro tiene un pago asociado.</p>
+            </div>
+          </figure>
+        </section>
+
+        <section class="guide">
+          <h3>3. Interpreta estados y acciones</h3>
+          <figure class="visual-card">
+            <figcaption><span class="step-number">03</span><span><b>Usa la acción que corresponda al estado</b><small>El listado habilita acciones distintas según la situación de cada remesa.</small></span></figcaption>
+            <div class="status-grid"><div><span class="badge amber">Pendiente</span><b>Disponible para pagar</b><small>Abre la remesa y sigue el manual de efectivo o depósito según corresponda.</small></div><div><span class="badge blue">En proceso</span><b>Depósito registrado</b><small>Confirma únicamente cuando el dinero esté acreditado.</small></div><div><span class="badge green">Pagada</span><b>Pago completado</b><small>Consulta el detalle o comprobante asociado.</small></div><div><span class="badge red">Devuelta / anulada</span><b>Sin pago disponible</b><small>Consulta el detalle y deriva diferencias al responsable.</small></div></div>
+              <p class="caption">Los filtros de Estado y Forma de pago permiten concentrarse en el grupo que necesitas revisar. No uses la acción de pagar para registros que ya están pagados, devueltos o anulados.</p>
+          </figure>
+        </section>
+      }
+
+      <section class="steps">
+        <h3>Control final</h3>
+        @if (guia === 'efectivo') {
+          <div><b>1</b><span><strong>Identidad y código</strong><small>Confirma que el documento corresponde al beneficiario indicado en la remesa.</small></span></div><div><b>2</b><span><strong>Monto y moneda</strong><small>Entrega exactamente el monto del resumen y confirma solo después de pagar en ventanilla.</small></span></div>
+        } @else if (guia === 'deposito') {
+          <div><b>1</b><span><strong>Cuenta y beneficiario</strong><small>Revisa la cuenta operativa y la cuenta destino antes de registrar.</small></span></div><div><b>2</b><span><strong>Acreditación real</strong><small>El estado En proceso requiere confirmar después de verificar el abono en el banco.</small></span></div>
+        } @else {
+          <div><b>1</b><span><strong>Periodo correcto</strong><small>Revisa Desde/Hasta y pulsa Buscar después de cambiar los filtros.</small></span></div><div><b>2</b><span><strong>Detalle y respaldo</strong><small>Abre el drawer para comprobar estado y forma de pago; revisa el PDF si está disponible.</small></span></div>
+        }
+      </section>
+
+      <footer class="doc-footer"><span>Manual integrado en el sistema · Pago de Remesas</span>@if (guia === 'reporte') { <a routerLink="/historial-pago-remesa">Ir a Reportes de pago →</a> } @else { <a routerLink="/pago-remesa" [queryParams]="{tipo: tipoPagoQuery}">Ir a {{ guia === 'efectivo' ? 'Pago en Efectivo' : 'Pago por Depósito' }} →</a> }</footer>
+      <app-manual-lectura [manualKey]="manualKey"></app-manual-lectura>
+    </article>
+  </div>
+</main>

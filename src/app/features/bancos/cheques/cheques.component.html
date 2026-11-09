@@ -1,0 +1,168 @@
+<mat-drawer-container class="bank-page-drawer cheque-page-drawer" [hasBackdrop]="true">
+  <mat-drawer-content class="bank-page-content">
+    <header class="b-head cheque-page-head">
+      <div class="b-head-icon"><mat-icon>receipt_long</mat-icon></div>
+      <div class="b-head-text"><h2>Cheques</h2><span>Administra chequeras, emisión, circulación y recepción entre agencias.</span></div>
+      <div class="b-head-actions"><a routerLink="/manuales/bancos" [queryParams]="{tipo:'cheques'}" class="bank-manual-help">? Manual</a><button class="b-btn b-btn-primary" type="button" (click)="abrirEmision()"><mat-icon>add</mat-icon> Emitir cheque</button></div>
+    </header>
+
+    <nav class="b-subtabs cheque-tabs" aria-label="Vistas de cheques">
+      <button type="button" [class.active]="sub === 'gestion'" (click)="setSub('gestion')">Cheques <span class="tab-count">{{ chequesAgencia.length }}</span></button>
+      <button type="button" [class.active]="sub === 'chequeras'" (click)="setSub('chequeras')">Chequeras <span class="tab-count">{{ chequeras.length }}</span></button>
+      <button type="button" [class.active]="sub === 'recepcion'" (click)="setSub('recepcion')">Por recibir @if (envios.length) { <span class="b-dot">{{ envios.length }}</span> }</button>
+    </nav>
+
+    @if (errorCheque && !drawerMode) { <div class="b-alert err" role="alert">{{ errorCheque }}</div> }
+    <div class="b-alert info cheque-lifecycle">
+      <mat-icon>info</mat-icon><strong>Ciclo del cheque</strong>
+      @for (e of leyendaEstados; track e.codigo) { <span class="b-badge" [ngClass]="e.clase">{{ e.label }}</span>@if (!$last) { <span class="lifecycle-arrow">→</span> } }
+    </div>
+
+    @if (sub === 'chequeras') {
+      <section class="b-card cheque-card">
+        <div class="b-card-head"><div><h3>Chequeras de la agencia</h3><span class="b-muted b-small">{{ chequerasFiltradas.length }} de {{ chequeras.length }} chequera(s)</span></div><button class="b-btn b-btn-outline b-btn-sm" type="button" (click)="loadChequeras()"><mat-icon>refresh</mat-icon> Actualizar</button></div>
+        <div class="b-note">Cada chequera agrupa un rango de cheques de una cuenta. Selecciona una para ver su disponibilidad y resumen.</div>
+        <div class="cheque-filters"><mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-icon matPrefix>search</mat-icon><input matInput [(ngModel)]="filtroChequeraTexto" placeholder="Buscar chequera"></mat-form-field><mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Disponibilidad</mat-label><mat-select [(ngModel)]="filtroDisponibilidad"><mat-option value="T">Todas</mat-option><mat-option value="D">Con disponibles</mat-option><mat-option value="C">Sin disponibles</mat-option></mat-select></mat-form-field></div>
+        @if (!chequeras.length) { <div class="b-empty"><mat-icon>inventory_2</mat-icon><strong>No hay chequeras registradas</strong></div> }
+        @else if (!chequerasFiltradas.length) { <div class="b-empty"><mat-icon>search_off</mat-icon><strong>No hay chequeras con esos filtros</strong></div> }
+        @else { <div class="b-table-wrap"><table class="b-table"><thead><tr><th></th><th>Chequera</th><th>Cuenta bancaria</th><th>Moneda</th><th class="b-r">Rango</th><th class="b-r">Disponibles</th><th class="b-r">En circulación</th><th></th></tr></thead><tbody>
+          @for (q of chequerasFiltradas; track q.id_chequera) { <tr class="cheque-list-row" [class.selected]="chequeraSeleccionada?.id_chequera === q.id_chequera" tabindex="0" (click)="verChequera(q)" (keydown.enter)="verChequera(q)"><td class="td-logo"><app-bank-logo [entidad]="q.entidad" [size]="32"></app-bank-logo></td><td><strong class="b-mono">{{ q.id_chequera }}</strong><small class="cheque-muted-line">{{ q.entidad }}</small></td><td class="b-mono">{{ q.num_cuenta }}</td><td><span class="currency-pill">{{ q.moneda }}</span></td><td class="b-r b-mono">{{ q.numero_ini }}–{{ +q.numero_ini + q.cantidad - 1 }}</td><td class="b-r"><strong class="available-count">{{ q.disponibles }}</strong></td><td class="b-r">{{ q.en_circulacion }}</td><td><mat-icon class="row-chevron">chevron_right</mat-icon></td></tr> }
+        </tbody></table></div> }
+      </section>
+    }
+
+    @if (sub === 'gestion') {
+      <section class="b-card cheque-card">
+        <div class="b-card-head"><div><h3>Cheques de la agencia</h3><span class="b-muted b-small">{{ chequesFiltrados.length }} de {{ chequesAgencia.length }} cheque(s) · selecciona uno para ver sus detalles y acciones</span></div><button class="b-btn b-btn-outline b-btn-sm" type="button" (click)="loadChequesAgencia()"><mat-icon>refresh</mat-icon> Actualizar</button></div>
+        <div class="cheque-filters"><mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-icon matPrefix>search</mat-icon><input matInput [(ngModel)]="filtroChequeTexto" placeholder="Buscar cheque"></mat-form-field><mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Estado</mat-label><mat-select [(ngModel)]="filtroChequeEstado"><mat-option value="T">Todos</mat-option>@for (estado of leyendaEstados; track estado.codigo) { <mat-option [value]="estado.codigo">{{ estado.label }}</mat-option> }</mat-select></mat-form-field></div>
+        @if (!chequesAgencia.length) { <div class="b-empty"><mat-icon>receipt_long</mat-icon><strong>Aún no hay cheques</strong><span>Usa “Emitir cheque” para registrar el primero.</span><button class="b-btn b-btn-outline b-btn-sm" type="button" (click)="abrirEmision()"><mat-icon>add</mat-icon> Emitir cheque</button></div> }
+        @else if (!chequesFiltrados.length) { <div class="b-empty"><mat-icon>search_off</mat-icon><strong>No hay cheques con esos filtros</strong></div> }
+        @else { <div class="b-table-wrap"><table class="b-table"><thead><tr><th></th><th>N° cheque</th><th>Cuenta bancaria</th><th>Beneficiario / concepto</th><th>Estado</th><th class="b-r">Monto</th><th></th></tr></thead><tbody>
+          @for (c of chequesFiltrados; track c.id_chequera + '-' + c.id_cheque) { <tr class="cheque-list-row" [class.selected]="chequeSeleccionado?.id_chequera === c.id_chequera && chequeSeleccionado?.id_cheque === c.id_cheque" tabindex="0" (click)="verCheque(c)" (keydown.enter)="verCheque(c)"><td class="td-logo"><app-bank-logo [entidad]="c.entidad || ''" [size]="30"></app-bank-logo></td><td><strong class="b-mono">{{ c.numero }}</strong><small class="cheque-muted-line">Chequera {{ c.id_chequera }}</small></td><td><strong>{{ c.entidad || '—' }}</strong><small class="cheque-muted-line b-mono">{{ c.num_cuenta || '—' }}</small></td><td class="concept-cell">{{ c.concepto || 'Sin concepto' }}</td><td><span class="b-badge" [ngClass]="chequeClass(c.estado)">{{ c.estado_label }}</span>@if(c.envio_pendiente){<small class="cheque-muted-line">Envío pendiente</small>}</td><td class="b-r b-strong cheque-amount">{{ (c.monto || 0) | number:'1.2-2' }}</td><td><mat-icon class="row-chevron">chevron_right</mat-icon></td></tr> }
+        </tbody></table></div> }
+      </section>
+    }
+
+    @if (sub === 'recepcion') {
+      <section class="b-card cheque-card">
+        <div class="b-card-head"><div><h3>Cheques enviados a tu agencia</h3><span class="b-muted b-small">{{ enviosFiltrados.length }} de {{ envios.length }} pendiente(s) de recepción</span></div><button class="b-btn b-btn-outline b-btn-sm" type="button" (click)="loadEnvios()"><mat-icon>refresh</mat-icon> Actualizar</button></div>
+        <div class="b-note"><strong>Recibir</strong> confirma el cheque en tu agencia y habilita su cobro. Selecciona un envío para revisar los detalles.</div>
+        <div class="cheque-filters single"><mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-icon matPrefix>search</mat-icon><input matInput [(ngModel)]="filtroEnvioTexto" placeholder="Buscar envío"></mat-form-field></div>
+        @if (!envios.length) { <div class="b-empty"><mat-icon>move_to_inbox</mat-icon><strong>No hay cheques pendientes de recepción</strong></div> }
+        @else if (!enviosFiltrados.length) { <div class="b-empty"><mat-icon>search_off</mat-icon><strong>No hay envíos con esa búsqueda</strong></div> }
+        @else { <div class="b-table-wrap"><table class="b-table"><thead><tr><th></th><th>N° cheque</th><th>Agencia de origen</th><th>Cuenta bancaria</th><th class="b-r">Monto</th><th>Fecha de envío</th><th></th></tr></thead><tbody>
+          @for (e of enviosFiltrados; track e.id) { <tr class="cheque-list-row" [class.selected]="envioSeleccionado?.id === e.id" tabindex="0" (click)="verEnvio(e)" (keydown.enter)="verEnvio(e)"><td class="td-logo"><app-bank-logo [entidad]="e.entidad" [size]="30"></app-bank-logo></td><td><strong class="b-mono">{{ e.id_cheque }}</strong><small class="cheque-muted-line"><span class="b-badge warn">Por recibir</span></small></td><td><strong>{{ e.agencia_origen_abr }}</strong><small class="cheque-muted-line">{{ e.agencia_origen_desc }}</small></td><td><strong>{{ e.entidad }}</strong><small class="cheque-muted-line b-mono">{{ e.num_cuenta }}</small></td><td class="b-r b-strong cheque-amount">{{ (e.monto || 0) | number:'1.2-2' }} {{ e.moneda }}</td><td class="b-nowrap">{{ e.fec_envio | date:'dd/MM/yy HH:mm' }}</td><td><mat-icon class="row-chevron">chevron_right</mat-icon></td></tr> }
+        </tbody></table></div> }
+      </section>
+    }
+  </mat-drawer-content>
+
+  <mat-drawer class="bank-side-drawer" position="end" mode="over" [opened]="!!drawerMode" (openedChange)="onDrawerOpenedChange($event)" (closedStart)="cerrarDrawer()">
+    @if (drawerMode === 'new') {
+      <header class="bank-drawer-head cheque-head"><span class="bank-drawer-icon"><mat-icon>add_card</mat-icon></span><div class="bank-drawer-copy"><h3>Emitir cheque</h3><p>Selecciona una chequera y registra el importe y concepto.</p></div><button class="b-btn b-btn-ghost b-btn-xs" type="button" aria-label="Cerrar" (click)="cerrarDrawer()"><mat-icon>close</mat-icon></button></header>
+      <div class="bank-drawer-body cheque-form-body">
+        @if(errorCheque){<div class="b-alert err" role="alert">{{ errorCheque }}</div>}
+        <div class="cheque-form-section"><div class="cheque-section-title"><span>01</span><div><strong>Datos del cheque</strong><small>Elige el rango y número disponible</small></div></div>
+          <label class="b-label" for="chequera-select">Chequera</label><select id="chequera-select" class="b-input" [(ngModel)]="emision.idChequera" (ngModelChange)="onChequeraChange()"><option [ngValue]="0">Seleccionar chequera…</option>@for (q of chequerasOpc; track q.id) { <option [ngValue]="q.id">{{ q.label }}</option> }</select>
+          <div class="cheque-map-launch"><span>Consulta la numeración y el estado de cada cheque.</span><button class="b-btn b-btn-outline b-btn-sm" type="button" [disabled]="!emision.idChequera" (click)="abrirMapaEmision()"><mat-icon>grid_view</mat-icon> Ver mapa de cheques</button></div>
+          <label class="b-label" for="cheque-select">N° de cheque</label><select id="cheque-select" class="b-input" [(ngModel)]="emision.idCheque"><option [ngValue]="0">Seleccionar número disponible…</option>@for (c of chequesDispOpc; track c.id) { <option [ngValue]="c.id">{{ c.label }}</option> }</select>
+        </div>
+        <div class="cheque-form-section"><div class="cheque-section-title"><span>02</span><div><strong>Importe y concepto</strong><small>Información que aparecerá en el registro</small></div></div>
+          <div class="b-grid2"><div><label class="b-label">Monto</label><input class="b-input" type="number" step="0.01" min="0" [(ngModel)]="emision.monto" placeholder="0.00"></div><div><label class="b-label" for="categoria-select">Categoría</label><select id="categoria-select" class="b-input" [(ngModel)]="emision.idCategoria"><option [ngValue]="0">Seleccionar categoría…</option>@for (categoria of categorias; track categoria.id) { <option [ngValue]="categoria.id">{{ categoria.descripcion }}</option> }</select></div></div>
+          <label class="b-label">Concepto / beneficiario</label><input class="b-input" type="text" [(ngModel)]="emision.concepto" maxlength="300" placeholder="A nombre de / detalle del cheque">
+        </div>
+      </div>
+      <footer class="bank-drawer-footer"><button class="b-btn b-btn-outline" type="button" (click)="cerrarDrawer()">Cancelar</button><button class="b-btn b-btn-primary" type="button" [disabled]="!puedeEmitir || guardando" (click)="emitir()">{{ guardando ? 'Emitiendo…' : 'Emitir cheque' }}</button></footer>
+    } @else if (drawerMode === 'cheque') {
+      @if (chequeSeleccionado; as c) {
+      <header class="bank-drawer-head cheque-head"><span class="bank-drawer-icon"><mat-icon>receipt_long</mat-icon></span><div class="bank-drawer-copy"><h3>Cheque #{{ c.numero }}</h3><p>{{ c.fecha_registro ? (c.fecha_registro | date:'dd/MM/yyyy HH:mm') : 'Chequera ' + c.id_chequera }}</p></div><span class="b-badge" [ngClass]="chequeClass(c.estado)">{{ c.estado_label }}</span><button class="b-btn b-btn-ghost b-btn-xs" type="button" aria-label="Cerrar" (click)="cerrarDrawer()"><mat-icon>close</mat-icon></button></header>
+      <div class="bank-drawer-body">
+        @if (!modoEnvio) {
+          <div class="cheque-detail-amount"><span>Monto del cheque</span><strong>{{ (c.monto || 0) | number:'1.2-2' }} {{ monedaCheque(c) }}</strong></div>
+          <div class="cheque-detail-list">
+            <div class="cheque-detail-row"><mat-icon>account_balance</mat-icon><div><span>Cuenta bancaria</span><strong>{{ c.entidad || '—' }} · {{ c.num_cuenta || '—' }}</strong></div></div>
+            <div class="cheque-detail-row"><mat-icon>tag</mat-icon><div><span>Chequera / número</span><strong>{{ c.id_chequera }} · {{ c.numero }}</strong></div></div>
+            <div class="cheque-detail-row"><mat-icon>category</mat-icon><div><span>Categoría</span><strong>{{ c.categoria || '—' }}</strong></div></div>
+            <div class="cheque-detail-row"><mat-icon>description</mat-icon><div><span>Concepto</span><strong>{{ c.concepto || '—' }}</strong></div></div>
+            <div class="cheque-detail-row"><mat-icon>schedule</mat-icon><div><span>Fecha de registro</span><strong>{{ c.fecha_registro ? (c.fecha_registro | date:'dd/MM/yyyy HH:mm') : '—' }}</strong></div></div>
+          </div>
+          <section class="cheque-attachments"><h4>Imágenes del cheque</h4><div class="attachment-cards">
+            @for (cara of carasCheque; track cara) { <div class="attachment-card"><mat-icon>image</mat-icon><div><strong>{{ cara === 'anverso' ? 'Anverso' : 'Reverso' }}</strong><small>{{ adjuntoCheque(c, cara) ? adjuntoCheque(c, cara)?.nombre : 'Sin imagen adjunta' }}</small></div>@if(adjuntoCheque(c,cara)){<a class="b-btn b-btn-ghost b-btn-xs" [href]="urlComprobante(adjuntoCheque(c,cara)!.path)" target="_blank" rel="noopener">Ver</a>}<input #imgCheque type="file" hidden accept=".pdf,.jpg,.jpeg,.png,.webp" (change)="subirImagen(c, cara, $event)"><button class="b-btn b-btn-outline b-btn-xs" type="button" [disabled]="subiendo === 'cheque-' + c.id_cheque + '-' + cara" (click)="imgCheque.click()">{{ subiendo === 'cheque-' + c.id_cheque + '-' + cara ? 'Subiendo…' : (adjuntoCheque(c,cara) ? 'Cambiar' : 'Adjuntar') }}</button></div> }
+          </div></section>
+        } @else {
+          <div class="cheque-send-intro"><mat-icon>outbound</mat-icon><div><strong>Enviar cheque a otra agencia</strong><span>El cheque quedará pendiente hasta que la agencia destino confirme.</span></div></div>
+          @if(errorCheque){<div class="b-alert err" role="alert">{{ errorCheque }}</div>}
+          <label class="b-label" for="agencia-destino-select">Agencia destino</label><select id="agencia-destino-select" class="b-input" [(ngModel)]="envio.idAgenciaDestino"><option [ngValue]="0">Seleccionar agencia…</option>@for (agencia of store.agencias(); track agencia.id_agencia) { <option [ngValue]="agencia.id_agencia">{{ agencia.descripcion }}</option> }</select>
+          <label class="b-label">Observaciones (opcional)</label><input class="b-input" type="text" [(ngModel)]="envio.observaciones" maxlength="200" placeholder="Añade una nota para la agencia destino">
+        }
+      </div>
+      <footer class="bank-drawer-footer">
+        @if (modoEnvio) { <button class="b-btn b-btn-outline" type="button" (click)="cancelarEnvio()">Volver al detalle</button><button class="b-btn b-btn-primary" type="button" [disabled]="!puedeEnviar || guardando" (click)="enviar()">{{ guardando ? 'Enviando…' : 'Enviar cheque' }}</button> }
+        @else {
+          @if (c.estado === 'A' || c.estado === 'T') { <button class="b-btn b-btn-ok" type="button" (click)="cobrar(c)"><mat-icon>payments</mat-icon> Cobrar</button> }
+          @if (c.estado === 'A') { <button class="b-btn b-btn-outline" type="button" (click)="iniciarEnvio(c)"><mat-icon>outbound</mat-icon> Enviar</button> }
+          @if (c.estado === 'A' || c.estado === 'E' || c.estado === 'T') { <button class="b-btn b-btn-danger" type="button" (click)="anular(c)">Anular</button> }
+          @if (c.estado === 'N') { <button class="b-btn b-btn-outline" type="button" (click)="revertirAnulacion(c)">Revertir anulación</button> }
+        }
+      </footer>
+      }
+    } @else if (drawerMode === 'chequera') {
+      @if (chequeraSeleccionada; as q) {
+      <header class="bank-drawer-head cheque-head"><span class="bank-drawer-icon"><mat-icon>inventory_2</mat-icon></span><div class="bank-drawer-copy"><h3>Chequera #{{ q.id_chequera }}</h3><p>{{ q.entidad }} · {{ q.num_cuenta }}</p></div><button class="b-btn b-btn-ghost b-btn-xs" type="button" aria-label="Cerrar" (click)="cerrarDrawer()"><mat-icon>close</mat-icon></button></header>
+      <div class="bank-drawer-body">
+        <div class="cheque-detail-list"><div class="cheque-detail-row"><mat-icon>account_balance</mat-icon><div><span>Cuenta bancaria</span><strong>{{ q.entidad }} · {{ q.num_cuenta }}</strong></div></div><div class="cheque-detail-row"><mat-icon>tag</mat-icon><div><span>Rango de cheques</span><strong>{{ q.numero_ini }}–{{ +q.numero_ini + q.cantidad - 1 }}</strong></div></div><div class="cheque-detail-row"><mat-icon>payments</mat-icon><div><span>Moneda</span><strong>{{ q.moneda }}</strong></div></div><div class="cheque-detail-row"><mat-icon>inventory_2</mat-icon><div><span>Disponibles</span><strong>{{ q.disponibles }}</strong></div></div><div class="cheque-detail-row"><mat-icon>sync_alt</mat-icon><div><span>En circulación</span><strong>{{ q.en_circulacion }}</strong></div></div><div class="cheque-detail-row"><mat-icon>check_circle</mat-icon><div><span>Cobrados</span><strong>{{ q.cobrados }}</strong></div></div><div class="cheque-detail-row"><mat-icon>block</mat-icon><div><span>Anulados</span><strong>{{ q.anulados }}</strong></div></div></div>
+        <section class="cheque-heatmap" aria-labelledby="cheque-heatmap-title">
+          <div class="cheque-heatmap-head"><div><h4 id="cheque-heatmap-title">Estado de la chequera</h4><span>Selecciona un número para ver el cheque</span></div><span class="cheque-heatmap-total">{{ q.cantidad }} cheques</span></div>
+          <div class="cheque-heatmap-legend" aria-label="Leyenda de estados">
+            <span><i class="heatmap-dot available"></i>Disponible</span><span><i class="heatmap-dot issued"></i>Registrado</span><span><i class="heatmap-dot sent"></i>Enviado</span><span><i class="heatmap-dot received"></i>Recibido</span><span><i class="heatmap-dot paid"></i>Cobrado</span><span><i class="heatmap-dot voided"></i>Anulado</span>
+          </div>
+          @if (cargandoMapaChequera) { <div class="cheque-heatmap-message"><mat-icon class="heatmap-spinner">progress_activity</mat-icon>Cargando estado de los cheques…</div> }
+          @else if (errorMapaChequera) { <div class="cheque-heatmap-message heatmap-error"><mat-icon>error_outline</mat-icon>{{ errorMapaChequera }}</div> }
+          @else {
+            <div class="cheque-heatmap-grid" aria-label="Números de cheques y su estado">
+              @for (item of mapaNumerosChequera; track item.numero) {
+                @if (item.cheque; as cheque) {
+                  <button type="button" class="heatmap-cell" [ngClass]="'status-' + cheque.estado" [attr.aria-label]="'Cheque ' + item.numero + ': ' + cheque.estado_label" [title]="'Cheque ' + item.numero + ' · ' + cheque.estado_label" (click)="verCheque(cheque)">{{ item.numero }}</button>
+                } @else {
+                  <span class="heatmap-cell status-I" [attr.aria-label]="'Cheque ' + item.numero + ': Disponible'" [title]="'Cheque ' + item.numero + ' · Disponible'">{{ item.numero }}</span>
+                }
+              }
+            </div>
+          }
+        </section>
+      </div>
+      <footer class="bank-drawer-footer"><button class="b-btn b-btn-outline" type="button" (click)="cerrarDrawer()">Cerrar</button><button class="b-btn b-btn-primary" type="button" [disabled]="q.disponibles <= 0" (click)="abrirEmision(q)"><mat-icon>add</mat-icon> Emitir de esta chequera</button></footer>
+      }
+    } @else if (drawerMode === 'envio') {
+      @if (envioSeleccionado; as e) {
+      <header class="bank-drawer-head receive-head"><span class="bank-drawer-icon"><mat-icon>move_to_inbox</mat-icon></span><div class="bank-drawer-copy"><h3>Recepción de cheque #{{ e.id_cheque }}</h3><p>Enviado {{ e.fec_envio | date:'dd/MM/yyyy HH:mm' }}</p></div><span class="b-badge warn">Por recibir</span><button class="b-btn b-btn-ghost b-btn-xs" type="button" aria-label="Cerrar" (click)="cerrarDrawer()"><mat-icon>close</mat-icon></button></header>
+      <div class="bank-drawer-body"><div class="cheque-detail-amount"><span>Monto del cheque</span><strong>{{ (e.monto || 0) | number:'1.2-2' }} {{ e.moneda }}</strong></div><div class="cheque-detail-list"><div class="cheque-detail-row"><mat-icon>account_balance</mat-icon><div><span>Cuenta bancaria</span><strong>{{ e.entidad }} · {{ e.num_cuenta }}</strong></div></div><div class="cheque-detail-row"><mat-icon>north_east</mat-icon><div><span>Agencia de origen</span><strong>{{ e.agencia_origen_desc }}</strong></div></div><div class="cheque-detail-row"><mat-icon>description</mat-icon><div><span>Concepto</span><strong>{{ e.concepto_obs || '—' }}</strong></div></div><div class="cheque-detail-row"><mat-icon>notes</mat-icon><div><span>Observaciones</span><strong>{{ e.observaciones || '—' }}</strong></div></div><div class="cheque-detail-row"><mat-icon>attach_file</mat-icon><div><span>Comprobante</span><strong>{{ e.comprobante_nombre || (e.comprobante_path ? 'Archivo adjunto' : 'Sin comprobante') }}</strong></div></div></div></div>
+      <footer class="bank-drawer-footer">
+        @if(e.comprobante_path){<a class="b-btn b-btn-outline" [href]="urlComprobante(e.comprobante_path)" target="_blank" rel="noopener"><mat-icon>visibility</mat-icon> Ver comprobante</a>}
+        <input #envioFile type="file" hidden accept=".pdf,.jpg,.jpeg,.png,.webp" (change)="subirComprobanteEnvio(e,$event)"><button class="b-btn b-btn-outline" type="button" [disabled]="subiendo === 'envio-' + e.id" (click)="envioFile.click()"><mat-icon>attach_file</mat-icon>{{ e.comprobante_path ? 'Reemplazar comprobante' : 'Adjuntar comprobante' }}</button>
+        <button class="b-btn b-btn-danger" type="button" [disabled]="procesando === e.id" (click)="rechazarEnvio(e)">Rechazar</button><button class="b-btn b-btn-ok" type="button" [disabled]="procesando === e.id" (click)="recibir(e)"><mat-icon>move_to_inbox</mat-icon>{{ procesando === e.id ? 'Recibiendo…' : 'Recibir cheque' }}</button>
+      </footer>
+      }
+    }
+  </mat-drawer>
+</mat-drawer-container>
+@if (mapaEmisionAbierto && chequeraEmisionSeleccionada; as q) {
+  <div class="cheque-map-dialog-backdrop" role="presentation" (click)="mapaEmisionAbierto = false">
+    <section class="cheque-map-dialog" role="dialog" aria-modal="true" aria-labelledby="emission-map-title" (click)="$event.stopPropagation()">
+      <header class="cheque-map-dialog-head"><span class="bank-drawer-icon"><mat-icon>grid_view</mat-icon></span><div><h3 id="emission-map-title">Mapa de cheques</h3><p>Chequera #{{ q.id_chequera }} · {{ q.entidad }} · {{ q.moneda }}</p></div><button class="b-btn b-btn-ghost b-btn-xs" type="button" aria-label="Cerrar mapa" (click)="mapaEmisionAbierto = false"><mat-icon>close</mat-icon></button></header>
+      <div class="cheque-map-dialog-content">
+        <div class="cheque-heatmap-head"><div><h4>Números {{ q.numero_ini }}–{{ +q.numero_ini + q.cantidad - 1 }}</h4><span>Selecciona un número disponible para usarlo en la emisión</span></div><span class="cheque-heatmap-total">{{ q.cantidad }} cheques</span></div>
+        <div class="cheque-heatmap-legend" aria-label="Leyenda de estados"><span><i class="heatmap-dot available"></i>Disponible</span><span><i class="heatmap-dot issued"></i>Registrado</span><span><i class="heatmap-dot sent"></i>Enviado</span><span><i class="heatmap-dot received"></i>Recibido</span><span><i class="heatmap-dot paid"></i>Cobrado</span><span><i class="heatmap-dot voided"></i>Anulado</span></div>
+        @if (cargandoMapaChequera) { <div class="cheque-heatmap-message"><mat-icon class="heatmap-spinner">progress_activity</mat-icon>Cargando estado de los cheques…</div> }
+        @else if (errorMapaChequera) { <div class="cheque-heatmap-message heatmap-error"><mat-icon>error_outline</mat-icon>{{ errorMapaChequera }}</div> }
+        @else { <div class="cheque-heatmap-grid dialog-heatmap-grid" aria-label="Selecciona un cheque disponible">
+          @for (item of mapaNumerosChequera; track item.numero) {
+            @if (!item.cheque || item.cheque.estado === 'I') { <button type="button" class="heatmap-cell status-I" [class.is-current]="emision.idCheque === (item.cheque?.id_cheque ?? item.numero)" [attr.aria-label]="'Seleccionar cheque ' + item.numero" [title]="'Cheque ' + item.numero + ' · Disponible'" (click)="seleccionarChequeMapa(item.cheque, item.numero)">{{ item.numero }}</button> }
+            @else { <span class="heatmap-cell" [ngClass]="'status-' + item.cheque.estado" [attr.aria-label]="'Cheque ' + item.numero + ': ' + item.cheque.estado_label" [title]="'Cheque ' + item.numero + ' · ' + item.cheque.estado_label">{{ item.numero }}</span> }
+          }
+        </div> }
+      </div>
+      <footer class="cheque-map-dialog-footer"><button class="b-btn b-btn-outline" type="button" (click)="mapaEmisionAbierto = false">Cerrar mapa</button></footer>
+    </section>
+  </div>
+}
