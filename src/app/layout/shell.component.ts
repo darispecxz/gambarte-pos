@@ -8,7 +8,6 @@ import { CambioService } from '../core/cambio.service';
 import { BankingService } from '../core/banking.service';
 import { GiroService, ComisionGiroResult } from '../core/giro.service';
 import { RemesaService, ComisionResult } from '../core/remesa.service';
-import { NotificacionService, Notificacion, NotificacionConteo } from '../core/notificacion.service';
 import { EstadoSiat } from '../core/models';
 import { Subscription, timer, switchMap, catchError, of, Subject } from 'rxjs';
 import { filter, debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -429,42 +428,6 @@ const ROLES_ADMIN = [ROL_OPERADOR, ROL_ADMIN, ROL_RESP_AGENCIA];
               }
             </button>
 
-            <!-- Notificaciones -->
-            <div class="notif-wrap">
-              <button class="hdr-icon-btn" (click)="notifPanelOpen = !notifPanelOpen"
-                      [class.has-unread]="notifConteo.total > 0">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                @if (notifConteo.total > 0) {
-                  <span class="notif-badge" [class.critica]="notifConteo.critica > 0">{{ notifConteo.total > 99 ? '99+' : notifConteo.total }}</span>
-                }
-              </button>
-              @if (notifPanelOpen) {
-                <div class="notif-panel" (click)="$event.stopPropagation()">
-                  <div class="np-head">
-                    <span class="np-title">Notificaciones</span>
-                    @if (notifConteo.total > 0) {
-                      <button class="np-mark-all" (click)="marcarTodasLeidas()">Marcar todas leídas</button>
-                    }
-                  </div>
-                  @if (notificaciones.length === 0) {
-                    <div class="np-empty">Sin notificaciones pendientes</div>
-                  } @else {
-                    <div class="np-list">
-                      @for (n of notificaciones; track n.id_notificacion) {
-                        <div class="np-item" [class.no-leida]="!n.leida" (click)="marcarLeida(n)">
-                          <span class="np-urg" [class]="'urg-' + n.urgencia"></span>
-                          <div class="np-body">
-                            <div class="np-item-title">{{ n.titulo }}</div>
-                            <div class="np-msg">{{ n.mensaje }}</div>
-                            <div class="np-time">{{ tiempoRelativo(n.fec_creacion) }}</div>
-                          </div>
-                        </div>
-                      }
-                    </div>
-                  }
-                </div>
-              }
-            </div>
           </div>
         </header>
 
@@ -1163,72 +1126,6 @@ const ROLES_ADMIN = [ROL_OPERADOR, ROL_ADMIN, ROL_RESP_AGENCIA];
       transition: background .15s;
     }
     .hdr-icon-btn:hover { background: var(--hover-bg, #f3f4f6); }
-    .hdr-icon-btn.has-unread { color: #F58634; }
-
-    /* ===== NOTIFICACIONES ===== */
-    .notif-wrap { position: relative; }
-    .notif-badge {
-      position: absolute; top: -5px; right: -5px;
-      min-width: 18px; height: 18px; border-radius: 9px;
-      background: #F58634; color: #fff;
-      font-size: 10px; font-weight: 700;
-      display: flex; align-items: center; justify-content: center;
-      padding: 0 4px; line-height: 1;
-    }
-    .notif-badge.critica { background: #dc2626; animation: pulse-badge 2s infinite; }
-    @keyframes pulse-badge { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
-
-    .notif-panel {
-      position: absolute;
-      top: calc(100% + 8px);
-      right: 0;
-      width: 360px;
-      max-height: 420px;
-      background: var(--panel-bg, #fff);
-      border: 1px solid var(--border, #e5e7eb);
-      border-radius: 12px;
-      box-shadow: 0 8px 30px rgba(0,0,0,.12);
-      z-index: 100;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-    .np-head {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 16px; border-bottom: 1px solid var(--border-light, #f1f5f9);
-    }
-    .np-title { font-size: 14px; font-weight: 700; color: var(--text-primary, #14213d); }
-    .np-mark-all {
-      font-size: 11.5px; color: #F58634; background: none; border: none;
-      cursor: pointer; font-weight: 600;
-    }
-    .np-mark-all:hover { text-decoration: underline; }
-    .np-empty {
-      padding: 32px 16px; text-align: center;
-      font-size: 13px; color: var(--text-muted, #94a3b8);
-    }
-    .np-list { overflow-y: auto; flex: 1; }
-    .np-item {
-      display: flex; align-items: flex-start; gap: 10px;
-      padding: 12px 16px; cursor: pointer;
-      border-bottom: 1px solid var(--border-light, #f1f5f9);
-      transition: background .15s;
-    }
-    .np-item:last-child { border-bottom: none; }
-    .np-item:hover { background: var(--hover-bg, #f8fafc); }
-    .np-item.no-leida { background: var(--notif-unread-bg, #fffbeb); }
-    .np-item.no-leida:hover { background: var(--notif-unread-hover, #fef3c7); }
-    .np-urg {
-      width: 8px; height: 8px; border-radius: 50%; flex: 0 0 8px; margin-top: 5px;
-    }
-    .np-urg.urg-critica { background: #dc2626; }
-    .np-urg.urg-alta { background: #f97316; }
-    .np-urg.urg-media { background: #f59e0b; }
-    .np-urg.urg-baja { background: #3b82f6; }
-    .np-body { flex: 1; min-width: 0; }
-    .np-item-title { font-size: 12.5px; font-weight: 600; color: var(--text-primary, #1e293b); }
-    .np-msg { font-size: 11.5px; color: var(--text-secondary, #64748b); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .np-time { font-size: 10.5px; color: var(--text-muted, #94a3b8); margin-top: 4px; }
 
     .tsp { flex: 1; }
 
@@ -1243,7 +1140,6 @@ const ROLES_ADMIN = [ROL_OPERADOR, ROL_ADMIN, ROL_RESP_AGENCIA];
     /* ===== MOBILE ===== */
     @media (max-width: 860px) {
       .page { padding: 14px; }
-      .notif-panel { width: 300px; right: -40px; }
     }
   `],
 })
@@ -1252,7 +1148,6 @@ export class ShellComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private cambioService = inject(CambioService);
   private bankingService = inject(BankingService);
-  private notifService = inject(NotificacionService);
   @ViewChild('sidenav') sidenav!: MatSidenav;
 
   isMobile = window.innerWidth < 860;
@@ -1266,7 +1161,6 @@ export class ShellComponent implements OnInit, OnDestroy {
   private siatSub?: Subscription;
   private routerSub?: Subscription;
   private bancosAvisosSub?: Subscription;
-  private notifSub?: Subscription;
 
   navItems: NavItem[] = [];
 
@@ -1484,54 +1378,6 @@ export class ShellComponent implements OnInit, OnDestroy {
     });
   }
 
-  // --- Notificaciones ---
-  notifConteo: NotificacionConteo = { total: 0, critica: 0, alta: 0, media: 0, baja: 0 };
-  notificaciones: Notificacion[] = [];
-  notifPanelOpen = false;
-
-  private cargarNotificaciones(): void {
-    this.notifService.contarNoLeidas().subscribe({
-      next: c => this.notifConteo = c,
-      error: () => {},
-    });
-    this.notifService.listar({ leida: 0, limit: 15 }).subscribe({
-      next: n => this.notificaciones = n,
-      error: () => {},
-    });
-  }
-
-  marcarLeida(n: Notificacion): void {
-    if (n.leida) return;
-    this.notifService.marcarLeida(n.id_notificacion).subscribe({
-      next: () => {
-        n.leida = 1;
-        this.notifConteo.total = Math.max(0, this.notifConteo.total - 1);
-      },
-      error: () => {},
-    });
-  }
-
-  marcarTodasLeidas(): void {
-    this.notifService.marcarTodasLeidas().subscribe({
-      next: () => {
-        this.notificaciones.forEach(n => n.leida = 1);
-        this.notifConteo = { total: 0, critica: 0, alta: 0, media: 0, baja: 0 };
-      },
-      error: () => {},
-    });
-  }
-
-  tiempoRelativo(fecha: string): string {
-    const diff = Date.now() - new Date(fecha).getTime();
-    const mins = Math.floor(diff / 60000);
-    if (mins < 1) return 'ahora';
-    if (mins < 60) return `hace ${mins}m`;
-    const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `hace ${hrs}h`;
-    const dias = Math.floor(hrs / 24);
-    return `hace ${dias}d`;
-  }
-
   // --- Dark mode ---
   cycleTheme(): void {
     const next = this.themeMode === 'light' ? 'dark' : this.themeMode === 'dark' ? 'system' : 'light';
@@ -1586,7 +1432,11 @@ export class ShellComponent implements OnInit, OnDestroy {
         this.autoExpandGroups(e.urlAfterRedirects);
       });
 
-    this.siatSub = timer(0, 120_000).pipe(
+    // SIAT no necesita refrescarse con tanta frecuencia; evitar consultas
+    // periódicas mientras la pestaña está en segundo plano también reduce
+    // conexiones innecesarias al backend compartido.
+    this.siatSub = timer(0, 600_000).pipe(
+      filter(() => document.visibilityState === 'visible'),
       switchMap(() => this.cambioService.estadoSiat().pipe(
         catchError(() => of({
           conexiones: { facturador: false, sin: false, estado: 'INACTIVO' as const },
@@ -1596,9 +1446,6 @@ export class ShellComponent implements OnInit, OnDestroy {
         } as EstadoSiat))
       ))
     ).subscribe(s => this.siatStatus = s);
-
-    this.cargarNotificaciones();
-    this.notifSub = timer(60_000, 60_000).subscribe(() => this.cargarNotificaciones());
 
     this.cargarCotizaciones();
     this.cargarDestinos();
@@ -1620,7 +1467,6 @@ export class ShellComponent implements OnInit, OnDestroy {
     this.siatSub?.unsubscribe();
     this.routerSub?.unsubscribe();
     this.bancosAvisosSub?.unsubscribe();
-    this.notifSub?.unsubscribe();
     this.envioSub?.unsubscribe();
   }
 
@@ -1663,7 +1509,6 @@ export class ShellComponent implements OnInit, OnDestroy {
   onDocClick(e: Event): void {
     const target = e.target as HTMLElement;
     if (this.siatPanelOpen && !target.closest('.siat-wrap')) this.siatPanelOpen = false;
-    if (this.notifPanelOpen && !target.closest('.notif-wrap')) this.notifPanelOpen = false;
     if (this.userMenuOpen && !target.closest('.user-menu-wrap')) { this.userMenuOpen = false; this.aparienciaOpen = false; }
   }
 

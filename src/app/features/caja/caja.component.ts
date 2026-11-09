@@ -393,6 +393,11 @@ interface MonedaSelection {
                   <span class="st-label">TOTAL {{ getSectionLabels() }} [{{ activeStep.caja.moneda }}]</span>
                   <span class="st-value">{{ activeStep.totalCalculado | number:'1.2-2' }}</span>
                 </div>
+                @if (mode === 'apertura' && activeStep.caja.boveda_disponible !== null && activeStep.totalCalculado > activeStep.caja.boveda_disponible) {
+                  <div class="vault-limit-error" role="alert">
+                    El monto supera el disponible en bóveda: {{ activeStep.caja.boveda_disponible | number:'1.2-2' }} {{ activeStep.caja.moneda }}.
+                  </div>
+                }
                 <div class="st-row st-confirm">
                   <span class="st-label">Confirmar Monto [{{ activeStep.caja.moneda }}]</span>
                   <input type="text" inputmode="decimal" autocomplete="off" class="confirm-input"
@@ -819,6 +824,16 @@ interface MonedaSelection {
     .confirm-mismatch { border-color: #DC2626 !important; box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important; }
 
     .st-diff { padding-top: 10px; }
+    .vault-limit-error {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      background: #fef2f2;
+      color: #b91c1c;
+      font-size: 12px;
+      font-weight: 700;
+    }
     .diff-positive { color: #16a34a; }
     .diff-negative { color: #DC2626; }
 
@@ -1274,8 +1289,13 @@ export class CajaComponent implements OnInit {
   private validateStep(step?: MonedaStep): void {
     const s = step ?? this.activeStep;
     if (!s) return;
+    const disponibleBoveda = s.caja.boveda_disponible;
+    const dentroDeBoveda = this.mode !== 'apertura'
+      || s.isExtra
+      || (disponibleBoveda !== null && s.totalCalculado <= disponibleBoveda + 0.0001);
     s.isValid = s.totalConfirmado !== null
-      && s.totalConfirmado === s.totalCalculado;
+      && s.totalConfirmado === s.totalCalculado
+      && dentroDeBoveda;
   }
 
   markZero(): void {
