@@ -24,6 +24,7 @@ import { ManualLecturaComponent } from './manual-lectura.component';
             <span class="title-icon">{{ isCajero ? '⇄' : '▣' }}</span>
             <div><h2>{{ isCajero ? 'Traspaso a Cajero' : 'Operaciones de Bóveda' }}</h2><p>{{ isCajero ? 'Envía efectivo desde tu caja a otra caja abierta de la misma moneda.' : 'Solicita efectivo para tu caja o envía fondos a la bóveda de tu agencia u otra agencia.' }}</p></div>
           </div>
+          <app-manual-lectura [manualKey]="manualKey" [videoOnly]="true"></app-manual-lectura>
 
           <section class="notice" [class.notice-blue]="isCajero"><b>{{ isCajero ? 'Antes de empezar' : 'Importante' }}</b><span>{{ isCajero ? 'Debes tener una caja abierta. El cajero destino también debe tener una caja abierta en la misma moneda.' : 'Debes tener una caja abierta. Solicitar fondos acredita la caja; enviar a bóveda descuenta el efectivo contado y deja el movimiento pendiente de recepción según el flujo de la agencia.' }}</span></section>
 
@@ -124,7 +125,7 @@ import { ManualLecturaComponent } from './manual-lectura.component';
 
           <section class="success"><b>✓</b><span><strong>Verificación</strong><small>{{ isCajero ? 'El movimiento debe aparecer en la lista con las cajas de origen y destino, el monto y la fecha correctos.' : 'Revisa el detalle en la lista y confirma que moneda, sentido del movimiento, bóveda destino y estado sean los esperados.' }}</small></span></section>
           <footer class="doc-footer"><span>Manual integrado en el sistema · Gestión Efectivo</span><a [routerLink]="isCajero ? '/movimientos/cajero' : '/movimientos/boveda'">Ir a {{ isCajero ? 'Traspaso a Cajero' : 'Operaciones de Bóveda' }} →</a></footer>
-          <app-manual-lectura [manualKey]="manualKey"></app-manual-lectura>
+          <app-manual-lectura [manualKey]="manualKey" [showVideo]="false"></app-manual-lectura>
         </article>
       </div>
     </main>

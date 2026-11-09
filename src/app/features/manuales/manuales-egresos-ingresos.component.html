@@ -11,6 +11,7 @@
     <article class="document">
       <div class="doc-top"><span>EGRESOS E INGRESOS</span><span>Guía paso a paso</span></div>
       <h2>{{ titulo }}</h2>
+      <app-manual-lectura [manualKey]="manualKey" [videoOnly]="true"></app-manual-lectura>
       <p class="intro">La caja seleccionada determina la moneda y el saldo sobre el que se registra la operación. Revisa el tipo de movimiento, el comprobante y el importe antes de guardar.</p>
 
       <section class="notice"><b>Antes de empezar</b><span>Debes tener una caja abierta. Selecciona la caja y moneda correctas. El comprobante es obligatorio para egresos, ingresos y transacciones bancarias; admite PDF, JPG o PNG de hasta 5 MB.</span></section>
@@ -202,7 +203,7 @@
       </section>
 
       <footer class="doc-footer"><span>Manual integrado en el sistema · Egresos e ingresos</span><a routerLink="/egresos-ingresos">Ir a Egresos e ingresos →</a></footer>
-      <app-manual-lectura [manualKey]="manualKey"></app-manual-lectura>
+      <app-manual-lectura [manualKey]="manualKey" [showVideo]="false"></app-manual-lectura>
     </article>
   </div>
 </main>

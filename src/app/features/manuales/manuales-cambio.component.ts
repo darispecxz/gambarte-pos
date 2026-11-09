@@ -24,6 +24,7 @@ type CambioManual = 'compra' | 'venta' | 'reportes';
         <article class="document">
           <div class="doc-top"><span>CAMBIO DE MONEDA</span><span>Guía paso a paso</span></div>
           <h2>{{ title }}</h2>
+          <app-manual-lectura [manualKey]="manualKey" [videoOnly]="true"></app-manual-lectura>
 
           @if (manual === 'reportes') {
             <p class="intro">Consulta el historial de compras y ventas, revisa los totales y abre el detalle de una operación.</p>
@@ -172,7 +173,7 @@ type CambioManual = 'compra' | 'venta' | 'reportes';
           }
 
           <footer><span>Manual integrado en el sistema · Cambio</span><a [routerLink]="manual==='reportes' ? '/historial' : '/cambio'" [queryParams]="manual==='reportes' ? {} : {op: manual==='venta' ? 'venta' : 'compra'}">Ir a {{ manual==='reportes' ? 'Reportes' : 'Cambio' }} <b>→</b></a></footer>
-          <app-manual-lectura [manualKey]="manualKey"></app-manual-lectura>
+          <app-manual-lectura [manualKey]="manualKey" [showVideo]="false"></app-manual-lectura>
         </article>
       </div>
     </main>

@@ -51,6 +51,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/manuales/manuales-pago-remesas.component').then(m => m.ManualesPagoRemesasComponent),
       },
       {
+        path: 'manuales/videos',
+        loadComponent: () => import('./features/manuales/videos-manuales.component').then(m => m.VideosManualesComponent),
+        canActivate: [roleGuard(2)],
+      },
+      {
         path: 'evaluacion/manuales',
         loadComponent: () => import('./features/manuales/seguimiento-manuales.component').then(m => m.SeguimientoManualesComponent),
         canActivate: [roleGuard(2)],

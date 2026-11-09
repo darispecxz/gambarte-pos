@@ -11,6 +11,7 @@
     <article class="document">
       <div class="doc-top"><span>PAGO DE REMESAS</span><span>Guía paso a paso</span></div>
       <h2>{{ titulo }}</h2>
+      <app-manual-lectura [manualKey]="manualKey" [videoOnly]="true"></app-manual-lectura>
       @if (guia === 'efectivo') {
         <p class="intro">Usa esta opción cuando la remesa corresponda a pago en efectivo. Busca el código, valida que esté pendiente y entrega el monto exacto al beneficiario identificado.</p>
         <section class="notice"><b>Antes de empezar</b><span>Confirma que estás en la agencia de destino correcta. Solo se puede pagar una remesa pendiente; revisa código, moneda, importe y datos del beneficiario antes de confirmar.</span></section>
@@ -228,7 +229,7 @@
       </section>
 
       <footer class="doc-footer"><span>Manual integrado en el sistema · Pago de Remesas</span>@if (guia === 'reporte') { <a routerLink="/historial-pago-remesa">Ir a Reportes de pago →</a> } @else { <a routerLink="/pago-remesa" [queryParams]="{tipo: tipoPagoQuery}">Ir a {{ guia === 'efectivo' ? 'Pago en Efectivo' : 'Pago por Depósito' }} →</a> }</footer>
-      <app-manual-lectura [manualKey]="manualKey"></app-manual-lectura>
+      <app-manual-lectura [manualKey]="manualKey" [showVideo]="false"></app-manual-lectura>
     </article>
   </div>
 </main>

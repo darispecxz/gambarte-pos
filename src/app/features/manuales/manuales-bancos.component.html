@@ -6,6 +6,7 @@
     <article class="document">
       <div class="doc-top"><span>BANCOS</span><span>Guía visual paso a paso</span></div>
       <div class="title-row"><span class="title-icon">⌂</span><div><h2>{{ titulo }}</h2><p>{{ resumen }}</p></div></div>
+      <app-manual-lectura [manualKey]="manualKey" [videoOnly]="true"></app-manual-lectura>
 
       @if (manual === 'cuentas') {
         <section class="notice"><b>Antes de empezar</b><span>Los saldos, estados de apertura/cierre y botones disponibles dependen de la agencia y de la moneda seleccionada. El arqueo solo aparece para cuentas propias compatibles.</span></section>
@@ -87,7 +88,7 @@
 
       <section class="success"><b>✓</b><span><strong>Antes de finalizar</strong><small>Comprueba cuenta, moneda, fecha, importe, estado y comprobante. Si un control no coincide con la operación que necesitas, detente y revisa los datos antes de confirmar.</small></span></section>
       <footer class="doc-footer"><span>Manual integrado en el sistema · {{ titulo }}</span><a [routerLink]="manual === 'cuentas' ? '/bancos/cuentas' : manual === 'traspasos' ? '/bancos/traspasos' : manual === 'depositos' ? '/bancos/depositos' : manual === 'movimientos' ? '/bancos/movimientos' : manual === 'cheques' ? '/bancos/cheques' : '/bancos/conciliacion'">Ir a {{ titulo }} →</a></footer>
-      <app-manual-lectura [manualKey]="manualKey"></app-manual-lectura>
+      <app-manual-lectura [manualKey]="manualKey" [showVideo]="false"></app-manual-lectura>
     </article>
   </div>
 </main>
