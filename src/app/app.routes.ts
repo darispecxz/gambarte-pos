@@ -65,6 +65,21 @@ export const routes: Routes = [
         loadComponent: () => import('./features/cambio/cambio.component').then(m => m.CambioComponent),
       },
       {
+        path: 'configuracion',
+        loadComponent: () => import('./features/configuracion/configuracion.component').then(m => m.ConfiguracionComponent),
+        canActivate: [roleGuard(1, 2, 4, 6)],
+      },
+      {
+        path: 'gestion-cotizaciones',
+        loadComponent: () => import('./features/gestion-cotizaciones/gestion-cotizaciones.component').then(m => m.GestionCotizacionesComponent),
+        canActivate: [roleGuard(1, 2, 4, 6)],
+      },
+      {
+        path: 'cotizaciones-programadas',
+        loadComponent: () => import('./features/cotizaciones-programadas/cotizaciones-programadas.component').then(m => m.CotizacionesProgramadasComponent),
+        canActivate: [roleGuard(1, 2, 4, 6)],
+      },
+      {
         path: 'cripto',
         loadComponent: () => import('./features/cripto/cripto.component').then(m => m.CriptoComponent),
       },

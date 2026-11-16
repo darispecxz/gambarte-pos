@@ -243,6 +243,12 @@ const ROLES_ADMIN = [ROL_OPERADOR, ROL_ADMIN, ROL_RESP_AGENCIA];
                 <span class="lbl">Egresos / Ingresos</span>
               </a>
             }
+            @if (tieneAccesoConfiguracion) {
+              <a class="nav-item" [class.active]="isActive('/configuracion') || isActive('/gestion-cotizaciones') || isActive('/cotizaciones-programadas')" routerLink="/configuracion" (click)="onNavClick()">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06-2.83 2.83-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21h-4v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06-2.83-2.83.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3v-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06 2.83-2.83.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3h4v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06 2.83 2.83-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21v4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                <span class="lbl">Configuración</span>
+              </a>
+            }
             <a class="nav-item" [class.active]="isActive('/manuales')"
                routerLink="/manuales/apertura-cajas" (click)="onNavClick()">
               <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M8 7h8M8 11h8"/></svg>
@@ -1196,6 +1202,10 @@ export class ShellComponent implements OnInit, OnDestroy {
   get tieneAccesoBancos(): boolean {
     const rol = this.auth.rol?.id_rol ?? 0;
     return ROLES_ADMIN.includes(rol);
+  }
+
+  get tieneAccesoConfiguracion(): boolean {
+    return ROLES_TODOS.includes(this.auth.rol?.id_rol ?? 0);
   }
 
   get tieneAccesoEgresos(): boolean {

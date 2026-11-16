@@ -26,6 +26,8 @@ export interface RolInfo {
 export interface AuthSession {
   token: string;
   expires_in: number;
+  refresh_token: string;
+  refresh_expires_in: number;
   user: UserInfo;
   agencia: AgenciaInfo;
   rol: RolInfo;
