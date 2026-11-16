@@ -51,6 +51,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/manuales/manuales-pago-remesas.component').then(m => m.ManualesPagoRemesasComponent),
       },
       {
+        path: 'manuales/videos',
+        loadComponent: () => import('./features/manuales/videos-manuales.component').then(m => m.VideosManualesComponent),
+        canActivate: [roleGuard(2)],
+      },
+      {
         path: 'evaluacion/manuales',
         loadComponent: () => import('./features/manuales/seguimiento-manuales.component').then(m => m.SeguimientoManualesComponent),
         canActivate: [roleGuard(2)],
@@ -58,6 +63,21 @@ export const routes: Routes = [
       {
         path: 'cambio',
         loadComponent: () => import('./features/cambio/cambio.component').then(m => m.CambioComponent),
+      },
+      {
+        path: 'configuracion',
+        loadComponent: () => import('./features/configuracion/configuracion.component').then(m => m.ConfiguracionComponent),
+        canActivate: [roleGuard(1, 2, 4, 6)],
+      },
+      {
+        path: 'gestion-cotizaciones',
+        loadComponent: () => import('./features/gestion-cotizaciones/gestion-cotizaciones.component').then(m => m.GestionCotizacionesComponent),
+        canActivate: [roleGuard(1, 2, 4, 6)],
+      },
+      {
+        path: 'cotizaciones-programadas',
+        loadComponent: () => import('./features/cotizaciones-programadas/cotizaciones-programadas.component').then(m => m.CotizacionesProgramadasComponent),
+        canActivate: [roleGuard(1, 2, 4, 6)],
       },
       {
         path: 'cripto',

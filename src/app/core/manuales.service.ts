@@ -21,10 +21,34 @@ export interface SeguimientoManual {
   leido_en: string | null;
 }
 
+export interface VideoManualInfo {
+  disponible: boolean;
+  nombre: string | null;
+  tamano_bytes: number | null;
+  actualizado_en: string | null;
+  max_size_mb: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ManualesService {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiBase}/manuales/lecturas`;
+  private readonly videosBase = `${environment.apiBase}/manuales/videos`;
+
+  videoInfo(manualKey: string): Observable<Envelope<VideoManualInfo>> {
+    return this.http.get<Envelope<VideoManualInfo>>(`${this.videosBase}/${encodeURIComponent(manualKey)}/info`);
+  }
+
+  video(manualKey: string): Observable<Blob> {
+    return this.http.get(`${this.videosBase}/${encodeURIComponent(manualKey)}`, { responseType: 'blob' });
+  }
+
+  subirVideo(manualKey: string, archivo: File): Observable<Envelope<{ manual_key: string; nombre: string; tamano_bytes: number; actualizado_en: string }>> {
+    const datos = new FormData();
+    datos.append('manual_key', manualKey);
+    datos.append('video', archivo);
+    return this.http.post<Envelope<{ manual_key: string; nombre: string; tamano_bytes: number; actualizado_en: string }>>(this.videosBase, datos);
+  }
 
   mias(): Observable<ManualLectura[]> {
     return this.http.get<Envelope<ManualLectura[]>>(`${this.base}/mias`)

@@ -25,31 +25,12 @@ import { ManualLecturaComponent } from './manual-lectura.component';
             <span class="document-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="10" width="18" height="11" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3M12 14v3"/></svg></span>
             <div><h2>{{ isCierre ? 'Cierre de caja' : 'Apertura de caja' }}</h2><p>{{ isCierre ? 'Cuenta y confirma el efectivo de cada moneda antes de cerrar la jornada.' : 'Registra y verifica el efectivo inicial de la caja antes de comenzar la jornada.' }}</p></div>
           </div>
+          <app-manual-lectura [manualKey]="manualKey" [videoOnly]="true"></app-manual-lectura>
 
           <section class="prerequisite">
             <span class="prerequisite-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4m0 4h.01"/></svg></span>
             <div><strong>Antes de empezar</strong><p>{{ isCierre ? 'Verifica que la caja esté abierta y que el efectivo esté disponible para el conteo. El sistema mostrará las monedas abiertas; si hay monedas sin abrir, puede pedirte confirmar cuáles incluir en el cierre.' : 'La bóveda de tu agencia debe estar abierta. Si aparece el aviso “Bóveda no abierta”, solicita su apertura antes de continuar.' }}</p></div>
           </section>
-
-          @if (!isCierre) {
-            <section class="manual-video" aria-label="Video guía de apertura de caja">
-              <div class="manual-video-heading">
-                <span class="manual-video-icon" aria-hidden="true">▶</span>
-                <div><strong>Video guía: Apertura de caja</strong><small>Repasa el flujo visual antes de registrar el conteo.</small></div>
-                @if (!videoOpen) {
-                  <button type="button" class="manual-video-toggle" (click)="videoOpen = true">Reproducir video</button>
-                } @else {
-                  <button type="button" class="manual-video-close" (click)="videoOpen = false">Cerrar video</button>
-                }
-              </div>
-              @if (videoOpen) {
-                <video class="manual-video-player" controls preload="none" playsinline>
-                  <source src="https://srv1610-files.hstgr.io/b4876c143968de1f/files/trainings/1_GambartePOS_Apertura_Caja.mp4" type="video/mp4">
-                  Tu navegador no puede reproducir este video. Verifica tu conexión e inténtalo de nuevo.
-                </video>
-              }
-            </section>
-          }
 
           <section class="interface-guide" aria-label="Referencias visuales de la interfaz">
             <div class="guide-heading"><span class="guide-heading-icon">◎</span><div><h3>Sigue las marcas en pantalla</h3><p>Las figuras reproducen los controles y colores que encontrarás en Punto de Venta.</p></div></div>
@@ -115,7 +96,7 @@ import { ManualLecturaComponent } from './manual-lectura.component';
           </section>
 
           <footer class="manual-document-footer"><span>Manual integrado en el sistema · {{ isCierre ? 'Cierre' : 'Apertura' }} de caja</span><a routerLink="/caja">Ir a Punto de Venta <span>→</span></a></footer>
-          <app-manual-lectura [manualKey]="manualKey"></app-manual-lectura>
+          <app-manual-lectura [manualKey]="manualKey" [showVideo]="false"></app-manual-lectura>
         </article>
       </div>
     </main>
@@ -166,15 +147,6 @@ import { ManualLecturaComponent } from './manual-lectura.component';
     .prerequisite-icon svg { width:18px; height:18px; }
     .prerequisite strong { color:#735116; font-size:11px; }
     .prerequisite p { margin:4px 0 0; color:#80652f; font-size:11px; line-height:1.5; }
-    .manual-video { margin:14px 0 18px; overflow:hidden; border:1px solid #dfe7f0; border-radius:11px; background:#fff; }
-    .manual-video-heading { display:flex; align-items:center; gap:10px; padding:12px 14px; }
-    .manual-video-icon { display:grid; place-items:center; width:32px; height:32px; flex:0 0 auto; border-radius:9px; background:#fff0e2; color:#bd5e12; font-size:12px; }
-    .manual-video-heading>div { display:flex; min-width:0; flex:1; flex-direction:column; gap:3px; }
-    .manual-video-heading strong { color:#243a58; font-size:11px; }
-    .manual-video-heading small { color:#7d8fa8; font-size:10px; }
-    .manual-video-toggle,.manual-video-close { min-height:34px; padding:0 12px; border:1px solid #e6b17f; border-radius:8px; background:#fff8f1; color:#a95715; font:inherit; font-size:10px; font-weight:700; cursor:pointer; white-space:nowrap; }
-    .manual-video-close { border-color:#dce4ed; background:#fff; color:#596d87; }
-    .manual-video-player { display:block; width:100%; max-height:520px; aspect-ratio:16/9; border-top:1px solid #e8eef5; background:#101827; }
     .interface-guide { margin:22px 0 24px; padding:17px; border:1px solid #dfe8f2; border-radius:13px; background:#f7f9fc; }
     .guide-heading { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
     .guide-heading-icon { width:32px; height:32px; display:grid; place-items:center; border-radius:9px; background:#eaf2ff; color:#2864ae; font-size:19px; }
@@ -292,13 +264,11 @@ import { ManualLecturaComponent } from './manual-lectura.component';
 export class ManualesComponent {
   private readonly route = inject(ActivatedRoute);
   isCierre = false;
-  videoOpen = false;
   get manualKey(): string { return this.isCierre ? 'cierre_caja' : 'apertura_caja'; }
 
   constructor() {
     this.route.queryParamMap.subscribe(params => {
       this.isCierre = params.get('tipo') === 'cierre';
-      this.videoOpen = false;
     });
   }
 }

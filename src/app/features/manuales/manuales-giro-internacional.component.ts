@@ -24,6 +24,7 @@ type GuiaGiro = 'enviar' | 'reportes';
         <article class="document">
           <div class="doc-top"><span>GIRO INTERNACIONAL</span><span>Guía paso a paso</span></div>
           <h2>{{ title }}</h2>
+          <app-manual-lectura [manualKey]="manualKey" [videoOnly]="true"></app-manual-lectura>
 
           @if (guia === 'enviar') {
             <p class="intro">Registra el envío de dinero desde Bolivia a Chile y revisa importes, comisiones y datos del destinatario antes de confirmar.</p>
@@ -132,7 +133,7 @@ type GuiaGiro = 'enviar' | 'reportes';
           }
 
           <footer><span>Manual integrado en el sistema · Giro Internacional</span><a [routerLink]="guia==='enviar' ? '/remesa' : '/historial-remesa'">Ir a {{ guia==='enviar' ? 'Enviar' : 'Reportes' }} <b>→</b></a></footer>
-          <app-manual-lectura [manualKey]="manualKey"></app-manual-lectura>
+          <app-manual-lectura [manualKey]="manualKey" [showVideo]="false"></app-manual-lectura>
         </article>
       </div>
     </main>
