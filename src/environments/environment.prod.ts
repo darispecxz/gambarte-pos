@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiBase: 'https://cgr.owl-tech.net/cgrapi/api',
+  apiBase: 'https://gambarte-api.owl-tech.net/api',
 };
