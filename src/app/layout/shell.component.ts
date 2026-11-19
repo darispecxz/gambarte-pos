@@ -96,6 +96,10 @@ const ROLES_ADMIN = [ROL_OPERADOR, ROL_ADMIN, ROL_RESP_AGENCIA];
               <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5c-.7-1-1.8-1.5-3.2-1.5-1.7 0-2.8.8-2.8 2s1 1.8 2.9 2.2l.8.2c1.9.4 2.8 1.1 2.8 2.4 0 1.4-1.3 2.4-3.3 2.4-1.5 0-2.8-.6-3.6-1.7M12 5.5v13"/></svg>
               <span class="lbl">Operaciones cripto</span>
             </a>
+            <a class="nav-item" [class.active]="isActive('/recargas')" routerLink="/recargas" (click)="onNavClick()">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M10 18h4"/></svg>
+              <span class="lbl">Recargas Chile</span>
+            </a>
             <!-- Giro Internacional (envio Chile) -->
             <div class="nav-group" [class.open]="remesaAbierta">
               <a class="nav-item" [class.active]="isActive('/remesa') || isActive('/historial-remesa')"
