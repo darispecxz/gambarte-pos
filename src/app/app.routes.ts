@@ -84,6 +84,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/cripto/cripto.component').then(m => m.CriptoComponent),
       },
       {
+        path: 'recargas',
+        loadComponent: () => import('./features/recargas/recargas.component').then(m => m.RecargasComponent),
+      },
+      {
         path: 'remesa',
         loadComponent: () => import('./features/remesa/remesa.component').then(m => m.RemesaComponent),
       },
