@@ -7,6 +7,7 @@ import { RecargasService, RecargaLinea, RecargaPendiente } from '../../core/reca
   selector: 'app-recargas', standalone: true, imports: [CommonModule, FormsModule],
   template: `
     <section class="recargas">
+      <div *ngIf="simulated" class="uat-banner" role="status">🧪 MODO UAT — Recargas y saldos simulados. No se conecta con Chile ni realiza movimientos reales.</div>
       <header><div><h1>Recargas pendientes de Chile</h1><p>Procesamiento con líneas de saldo en BOB</p></div>
         <button (click)="cargar()" [disabled]="busy">Actualizar</button></header>
       <p class="error" *ngIf="error" role="alert">{{error}}</p>
@@ -43,6 +44,7 @@ import { RecargasService, RecargaLinea, RecargaPendiente } from '../../core/reca
     .panel{margin-top:20px;background:white;padding:20px;border:1px solid #e2e8f0;border-radius:12px}
     label{display:block;font-weight:600;margin-top:12px}select,input{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px}
     .actions{display:flex;gap:10px;margin:18px 0}.error{color:#b91c1c}.notice{color:#047857}
+    .uat-banner{padding:12px 16px;background:#fef3c7;border:1px solid #f59e0b;color:#92400e;font-weight:700;border-radius:10px;margin-bottom:16px}
   `],
 })
 export class RecargasComponent implements OnInit {
@@ -57,9 +59,13 @@ export class RecargasComponent implements OnInit {
   busy = false;
   error = '';
   notice = '';
+  simulated = false;
 
   get lineasDisponibles() { return this.lineas.filter(l => l.id_proveedor === this.selected?.id_proveedor); }
-  ngOnInit() { this.cargar(); }
+  ngOnInit() {
+    this.service.modo().subscribe({ next: result => this.simulated = result.simulated });
+    this.cargar();
+  }
   proveedor(id: number) { return ({ 1: 'ENTEL', 2: 'TIGO', 3: 'VIVA' } as Record<number,string>)[id] || `Proveedor ${id}`; }
   cargar() {
     this.busy = true; this.error = ''; this.notice = '';
