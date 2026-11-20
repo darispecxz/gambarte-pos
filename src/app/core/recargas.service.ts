@@ -41,10 +41,14 @@ export class RecargasService {
   reservar(id: number, requestId: string) {
     return this.unwrap(this.http.post<Envelope<{ token: string; expires_at: string }>>(`${this.base}/${id}/reservar`, { request_id: requestId }));
   }
-  confirmar(id: number, requestId: string, token: string, lineId: number, glosa: string) {
-    return this.unwrap(this.http.post<Envelope<{ estado: string }>>(`${this.base}/${id}/confirmar`, {
-      request_id: requestId, token, id_linea: lineId, glosa,
-    }));
+  confirmar(id: number, requestId: string, token: string, lineId: number, glosa: string, comprobante: File) {
+    const form = new FormData();
+    form.append('request_id', requestId);
+    form.append('token', token);
+    form.append('id_linea', String(lineId));
+    form.append('glosa', glosa);
+    form.append('comprobante', comprobante, comprobante.name);
+    return this.unwrap(this.http.post<Envelope<{ estado: string }>>(`${this.base}/${id}/confirmar`, form));
   }
   liberar(id: number, requestId: string, token: string) {
     return this.unwrap(this.http.post<Envelope<{ estado: string }>>(`${this.base}/${id}/liberar`, { request_id: requestId, token }));
