@@ -28,8 +28,12 @@ import { RecargasService, RecargaLinea, RecargaPendiente } from '../../core/reca
         <select [(ngModel)]="lineId"><option [ngValue]="0">Seleccione una línea</option>
           <option *ngFor="let l of lineasDisponibles" [ngValue]="l.id_linea">{{l.numero}} — saldo BOB {{l.saldo_bob}}</option>
         </select>
-        <label>Referencia / observación</label><input [(ngModel)]="glosa" maxlength="240" placeholder="Comprobante o referencia" />
-        <div class="actions"><button [disabled]="busy || !lineId" (click)="confirmar()">Confirmar recarga realizada</button>
+        <label for="recarga-comprobante">Comprobante de recarga <span class="required">*</span></label>
+        <input id="recarga-comprobante" type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" (change)="seleccionarComprobante($event)" [disabled]="busy" />
+        <small>Adjunta el comprobante real (PDF, JPG o PNG, máximo 2 MB). Se almacenará de forma privada.</small>
+        <p *ngIf="comprobante" class="file-ok">✓ {{comprobante.name}} ({{comprobante.size / 1024 | number:'1.0-0'}} KB)</p>
+        <label for="recarga-glosa">Referencia / observación (opcional)</label><input id="recarga-glosa" [(ngModel)]="glosa" maxlength="240" placeholder="Número de operación o nota" />
+        <div class="actions"><button [disabled]="busy || !lineId || !comprobante" (click)="confirmar()">Confirmar recarga realizada</button>
           <button class="secondary" [disabled]="busy" (click)="liberar()">Liberar sin procesar</button></div>
         <small>Si hubo un error de red durante la confirmación, consulta el estado antes de volver a operar.</small>
       </div>
@@ -42,7 +46,8 @@ import { RecargasService, RecargaLinea, RecargaPendiente } from '../../core/reca
     button:disabled{opacity:.5;cursor:not-allowed}.secondary{background:#64748b}.table-wrap{overflow-x:auto;background:white;border-radius:12px}
     table{width:100%;border-collapse:collapse}td,th{padding:13px;text-align:left;border-bottom:1px solid #e5e7eb}
     .panel{margin-top:20px;background:white;padding:20px;border:1px solid #e2e8f0;border-radius:12px}
-    label{display:block;font-weight:600;margin-top:12px}select,input{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px}
+    label{display:block;font-weight:600;margin-top:12px}select,input{width:100%;box-sizing:border-box;padding:10px;border:1px solid #cbd5e1;border-radius:8px}
+    input[type=file]{background:#f8fafc;cursor:pointer}.required{color:#b91c1c}.file-ok{color:#047857;font-weight:600;margin:6px 0}
     .actions{display:flex;gap:10px;margin:18px 0}.error{color:#b91c1c}.notice{color:#047857}
     .uat-banner{padding:12px 16px;background:#fef3c7;border:1px solid #f59e0b;color:#92400e;font-weight:700;border-radius:10px;margin-bottom:16px}
   `],
@@ -56,6 +61,7 @@ export class RecargasComponent implements OnInit {
   token = '';
   lineId = 0;
   glosa = '';
+  comprobante: File | null = null;
   busy = false;
   error = '';
   notice = '';
@@ -67,6 +73,20 @@ export class RecargasComponent implements OnInit {
     this.cargar();
   }
   proveedor(id: number) { return ({ 1: 'ENTEL', 2: 'TIGO', 3: 'VIVA' } as Record<number,string>)[id] || `Proveedor ${id}`; }
+  seleccionarComprobante(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    const allowed = ['application/pdf', 'image/jpeg', 'image/png'];
+    this.comprobante = null;
+    this.error = '';
+    if (file && (!allowed.includes(file.type) || file.size > 2 * 1024 * 1024 || file.size === 0)) {
+      this.error = 'El comprobante debe ser PDF, JPG o PNG y no superar 2 MB.';
+      input.value = '';
+      return;
+    }
+    this.comprobante = file;
+  }
+  private limpiarFormulario() { this.selected = null; this.lineId = 0; this.glosa = ''; this.comprobante = null; }
   cargar() {
     this.busy = true; this.error = ''; this.notice = '';
     this.service.pendientes().subscribe({
@@ -79,15 +99,15 @@ export class RecargasComponent implements OnInit {
     this.busy = true; this.error = '';
     const id = crypto.randomUUID();
     this.service.reservar(r.id_detalle_recarga, id).subscribe({
-      next: result => { this.requestId = id; this.token = result.token; this.selected = r; this.busy = false; },
+      next: result => { this.requestId = id; this.token = result.token; this.selected = r; this.glosa = ''; this.comprobante = null; this.busy = false; },
       error: e => { this.error = e.error?.message || e.message; this.busy = false; },
     });
   }
   confirmar() {
-    if (!this.selected || !this.lineId) return;
+    if (!this.selected || !this.lineId || !this.comprobante) return;
     this.busy = true;
-    this.service.confirmar(this.selected.id_detalle_recarga, this.requestId, this.token, this.lineId, this.glosa).subscribe({
-      next: () => { this.selected = null; this.lineId = 0; this.cargar(); this.notice = 'Recarga confirmada correctamente'; },
+    this.service.confirmar(this.selected.id_detalle_recarga, this.requestId, this.token, this.lineId, this.glosa, this.comprobante).subscribe({
+      next: () => { this.limpiarFormulario(); this.cargar(); this.notice = 'Recarga confirmada correctamente con comprobante adjunto'; },
       error: e => { this.error = e.error?.message || e.message; this.busy = false; },
     });
   }
@@ -95,7 +115,7 @@ export class RecargasComponent implements OnInit {
     if (!this.selected) return;
     this.busy = true;
     this.service.liberar(this.selected.id_detalle_recarga, this.requestId, this.token).subscribe({
-      next: () => { this.selected = null; this.lineId = 0; this.cargar(); },
+      next: () => { this.limpiarFormulario(); this.cargar(); },
       error: e => { this.error = e.error?.message || e.message; this.busy = false; },
     });
   }
