@@ -36,6 +36,7 @@ export class RecargasService {
   }
 
   pendientes() { return this.unwrap(this.http.get<Envelope<RecargaPendiente[]>>(`${this.base}/pendientes`)); }
+  modo() { return this.unwrap(this.http.get<Envelope<{ simulated: boolean }>>(`${this.base}/modo`)); }
   lineas() { return this.unwrap(this.http.get<Envelope<RecargaLinea[]>>(`${this.base}/lineas`)); }
   reservar(id: number, requestId: string) {
     return this.unwrap(this.http.post<Envelope<{ token: string; expires_at: string }>>(`${this.base}/${id}/reservar`, { request_id: requestId }));
