@@ -44,10 +44,11 @@ export class CajeroService {
     }));
   }
 
-  cierre(idCaja: number, montos: DenominacionInput[]): Observable<CierreResponse> {
+  cierre(idCaja: number, montos: DenominacionInput[], justificacionDiferencia = ''): Observable<CierreResponse> {
     return this.unwrap(this.http.post<Envelope<CierreResponse>>(`${this.base}/cierre`, {
       id_caja: idCaja,
       montos,
+      justificacion_diferencia: justificacionDiferencia,
     }));
   }
 
@@ -56,6 +57,14 @@ export class CajeroService {
       id_caja: idCaja,
       montos,
     }));
+  }
+
+  reporteCajaPdfUrl(idCaja: number, tipo: 'apertura' | 'cierre'): string {
+    return `${this.base}/reporte-caja/${idCaja}/${tipo}`;
+  }
+
+  descargarReporteCajaPdf(idCaja: number, tipo: 'apertura' | 'cierre'): Observable<Blob> {
+    return this.http.get(this.reporteCajaPdfUrl(idCaja, tipo), { responseType: 'blob' });
   }
 
   // --- Movimientos de caja ---

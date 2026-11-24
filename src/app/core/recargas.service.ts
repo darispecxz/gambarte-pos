@@ -36,6 +36,7 @@ export class RecargasService {
   }
 
   pendientes() { return this.unwrap(this.http.get<Envelope<RecargaPendiente[]>>(`${this.base}/pendientes`)); }
+  realizadas() { return this.unwrap(this.http.get<Envelope<RecargaPendiente[]>>(`${this.base}/realizadas`)); }
   modo() { return this.unwrap(this.http.get<Envelope<{ simulated: boolean }>>(`${this.base}/modo`)); }
   lineas() { return this.unwrap(this.http.get<Envelope<RecargaLinea[]>>(`${this.base}/lineas`)); }
   reservar(id: number, requestId: string) {
@@ -49,6 +50,17 @@ export class RecargasService {
     form.append('glosa', glosa);
     form.append('comprobante', comprobante, comprobante.name);
     return this.unwrap(this.http.post<Envelope<{ estado: string }>>(`${this.base}/${id}/confirmar`, form));
+  }
+  registrarYConfirmar(data: { requestId: string; proveedorId: number; celular: string; montoBob: number; lineId: number; glosa: string; comprobante: File }) {
+    const form = new FormData();
+    form.append('request_id', data.requestId);
+    form.append('id_proveedor', String(data.proveedorId));
+    form.append('celular', data.celular);
+    form.append('monto_bob', String(data.montoBob));
+    form.append('id_linea', String(data.lineId));
+    form.append('glosa', data.glosa);
+    form.append('comprobante', data.comprobante, data.comprobante.name);
+    return this.unwrap(this.http.post<Envelope<{ estado: string; id_recarga: number; id_detalle_recarga: number }>>(`${this.base}/registrar-y-confirmar`, form));
   }
   liberar(id: number, requestId: string, token: string) {
     return this.unwrap(this.http.post<Envelope<{ estado: string }>>(`${this.base}/${id}/liberar`, { request_id: requestId, token }));

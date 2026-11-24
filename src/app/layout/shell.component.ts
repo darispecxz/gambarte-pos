@@ -8,6 +8,7 @@ import { CambioService } from '../core/cambio.service';
 import { BankingService } from '../core/banking.service';
 import { GiroService, ComisionGiroResult } from '../core/giro.service';
 import { RemesaService, ComisionResult } from '../core/remesa.service';
+import { CuentaService } from '../core/cuenta.service';
 import { EstadoSiat } from '../core/models';
 import { Subscription, timer, switchMap, catchError, of, Subject } from 'rxjs';
 import { filter, debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -51,70 +52,81 @@ const ROLES_ADMIN = [ROL_OPERADOR, ROL_ADMIN, ROL_RESP_AGENCIA];
 
         <nav class="side-nav">
           <div class="group">
-            <div class="group-h">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-              <span>Operaciones</span>
-            </div>
-            <!-- Dashboard -->
-            <a class="nav-item" [class.active]="isActive('/dashboard')"
+            <a class="nav-item" data-icon="dashboard" [class.active]="isActive('/dashboard')"
                routerLink="/dashboard" (click)="onNavClick()">
               <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
               <span class="lbl">Inicio</span>
             </a>
-            <!-- Mis Cajas -->
-            <a class="nav-item" [class.active]="isActive('/caja')"
+          </div>
+          <div class="section-divider"></div>
+          <div class="group">
+            <div class="group-h"><span>Operaciones</span></div>
+            <!-- Apertura / Cierre de Caja -->
+            <a class="nav-item" data-icon="point_of_sale" [class.active]="isActive('/caja')"
                routerLink="/caja" (click)="onNavClick()">
               <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7h20l-2 13H4L2 7z"/><path d="M5 7V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2"/><line x1="9" y1="11" x2="9" y2="16"/><line x1="15" y1="11" x2="15" y2="16"/></svg>
-              <span class="lbl">Mis Cajas</span>
+              <span class="lbl">Apertura / Cierre de Caja</span>
             </a>
             <!-- Cambio (collapsible) -->
             <div class="nav-group" [class.open]="cambioAbierto">
-              <a class="nav-item" [class.active]="isActive('/cambio') || isActive('/historial')"
-                 (click)="cambioAbierto = !cambioAbierto">
+              <a class="nav-item" data-icon="currency_exchange" [class.active]="isActive('/cambio') || isActive('/historial')"
+                 (click)="toggleGroup('cambio')" [attr.aria-expanded]="cambioAbierto">
                 <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                 <span class="lbl">Cambio</span>
                 <svg class="chev" [class.rot]="cambioAbierto" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
               </a>
               @if (cambioAbierto) {
                 <div class="sub-nav">
-                  <a class="sub-item" [class.active]="isActive('/cambio') && cambioOp === 'compra'"
+                  <a class="sub-item" data-icon="south" [class.active]="isActive('/cambio') && cambioOp === 'compra'"
                      [routerLink]="['/cambio']" [queryParams]="{ op: 'compra' }" (click)="onNavClick()">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     Compra</a>
-                  <a class="sub-item" [class.active]="isActive('/cambio') && cambioOp === 'venta'"
+                  <a class="sub-item" data-icon="north" [class.active]="isActive('/cambio') && cambioOp === 'venta'"
                      [routerLink]="['/cambio']" [queryParams]="{ op: 'venta' }" (click)="onNavClick()">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                     Venta</a>
-                  <a class="sub-item" [class.active]="isActive('/historial')"
+                  <a class="sub-item" data-icon="bar_chart" [class.active]="isActive('/historial')"
                      routerLink="/historial" (click)="onNavClick()">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5"/><path d="M4 19h16"/><rect x="7" y="12" width="2.5" height="4" rx=".5"/><rect x="11" y="9" width="2.5" height="7" rx=".5"/><rect x="15" y="6" width="2.5" height="10" rx=".5"/></svg>
                     Reportes</a>
                 </div>
               }
             </div>
-            <a class="nav-item" [class.active]="isActive('/cripto')" routerLink="/cripto" (click)="onNavClick()">
+            <a class="nav-item" data-icon="currency_bitcoin" [class.active]="isActive('/cripto')" routerLink="/cripto" (click)="onNavClick()">
               <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5c-.7-1-1.8-1.5-3.2-1.5-1.7 0-2.8.8-2.8 2s1 1.8 2.9 2.2l.8.2c1.9.4 2.8 1.1 2.8 2.4 0 1.4-1.3 2.4-3.3 2.4-1.5 0-2.8-.6-3.6-1.7M12 5.5v13"/></svg>
               <span class="lbl">Operaciones cripto</span>
             </a>
-            <a class="nav-item" [class.active]="isActive('/recargas')" routerLink="/recargas" (click)="onNavClick()">
-              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M10 18h4"/></svg>
-              <span class="lbl">Recargas Chile</span>
-            </a>
+            <div class="nav-group" [class.open]="recargasAbierta">
+              <a class="nav-item" data-icon="phone_android" [class.active]="isActive('/recargas')" (click)="toggleGroup('recargas')" [attr.aria-expanded]="recargasAbierta">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M10 18h4"/></svg>
+                <span class="lbl">Gestión de recargas</span><svg class="chev" [class.rot]="recargasAbierta" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </a>
+              @if (recargasAbierta) {
+                <div class="sub-nav">
+                  <a class="sub-item" data-icon="fact_check" [class.active]="isActive('/recargas') && recargasVista === 'realizadas'" routerLink="/recargas" [queryParams]="{ vista: 'realizadas' }" (click)="onNavClick()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h12"/></svg>Recargas realizadas</a>
+                  <a class="sub-item" data-icon="pending_actions" [class.active]="isActive('/recargas') && recargasVista !== 'realizadas'" routerLink="/recargas" [queryParams]="{ vista: 'pendientes' }" (click)="onNavClick()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>Pendientes por procesar</a>
+                </div>
+              }
+            </div>
+          </div>
+          <div class="section-divider"></div>
+          <div class="group">
+            <div class="group-h"><span>Giros y remesas</span></div>
             <!-- Giro Internacional (envio Chile) -->
             <div class="nav-group" [class.open]="remesaAbierta">
-              <a class="nav-item" [class.active]="isActive('/remesa') || isActive('/historial-remesa')"
-                 (click)="remesaAbierta = !remesaAbierta">
+              <a class="nav-item" data-icon="language" [class.active]="isActive('/remesa') || isActive('/historial-remesa')"
+                 (click)="toggleGroup('remesa')" [attr.aria-expanded]="remesaAbierta">
                 <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                 <span class="lbl">Giro Internacional</span>
                 <svg class="chev" [class.rot]="remesaAbierta" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
               </a>
               @if (remesaAbierta) {
                 <div class="sub-nav">
-                  <a class="sub-item" [class.active]="isActive('/remesa')"
+                  <a class="sub-item" data-icon="send" [class.active]="isActive('/remesa')"
                      routerLink="/remesa" (click)="onNavClick()">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                     Enviar</a>
-                  <a class="sub-item" [class.active]="isActive('/historial-remesa')"
+                  <a class="sub-item" data-icon="bar_chart" [class.active]="isActive('/historial-remesa')"
                      routerLink="/historial-remesa" (click)="onNavClick()">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5"/><path d="M4 19h16"/><rect x="7" y="12" width="2.5" height="4" rx=".5"/><rect x="11" y="9" width="2.5" height="7" rx=".5"/><rect x="15" y="6" width="2.5" height="10" rx=".5"/></svg>
                     Reportes</a>
@@ -123,23 +135,23 @@ const ROLES_ADMIN = [ROL_OPERADOR, ROL_ADMIN, ROL_RESP_AGENCIA];
             </div>
             <!-- Pago de Remesas (Chile → Bolivia, DB externa) -->
             <div class="nav-group" [class.open]="pagoRemesaAbierto">
-              <a class="nav-item" [class.active]="isActive('/pago-remesa') || isActive('/historial-pago-remesa')"
-                 (click)="pagoRemesaAbierto = !pagoRemesaAbierto">
+              <a class="nav-item" data-icon="payments" [class.active]="isActive('/pago-remesa') || isActive('/historial-pago-remesa')"
+                 (click)="toggleGroup('pagoRemesa')" [attr.aria-expanded]="pagoRemesaAbierto">
                 <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 <span class="lbl">Pago de Remesas</span>
                 <svg class="chev" [class.rot]="pagoRemesaAbierto" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
               </a>
               @if (pagoRemesaAbierto) {
                 <div class="sub-nav">
-                  <a class="sub-item" [class.active]="isActive('/pago-remesa') && pagoRemesaTipo === 'efectivo'"
+                  <a class="sub-item" data-icon="payments" [class.active]="isActive('/pago-remesa') && pagoRemesaTipo === 'efectivo'"
                      routerLink="/pago-remesa" [queryParams]="{tipo: 'efectivo'}" (click)="onNavClick()">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="12" x2="6" y2="12"/></svg>
                     Pago en Efectivo</a>
-                  <a class="sub-item" [class.active]="isActive('/pago-remesa') && pagoRemesaTipo === 'deposito'"
+                  <a class="sub-item" data-icon="account_balance" [class.active]="isActive('/pago-remesa') && pagoRemesaTipo === 'deposito'"
                      routerLink="/pago-remesa" [queryParams]="{tipo: 'deposito'}" (click)="onNavClick()">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
                     Pago por Deposito</a>
-                  <a class="sub-item" [class.active]="isActive('/historial-pago-remesa')"
+                  <a class="sub-item" data-icon="description" [class.active]="isActive('/historial-pago-remesa')"
                      routerLink="/historial-pago-remesa" (click)="onNavClick()">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                     Reporte</a>
@@ -148,48 +160,52 @@ const ROLES_ADMIN = [ROL_OPERADOR, ROL_ADMIN, ROL_RESP_AGENCIA];
             </div>
             <!-- Giro Nacional (collapsible) -->
             <div class="nav-group" [class.open]="giroAbierto">
-              <a class="nav-item" [class.active]="isActive('/giro') || isActive('/historial-giro')"
-                 (click)="giroAbierto = !giroAbierto">
+              <a class="nav-item" data-icon="location_on" [class.active]="isActive('/giro') || isActive('/historial-giro')"
+                 (click)="toggleGroup('giro')" [attr.aria-expanded]="giroAbierto">
                 <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 8l10 6 10-6"/></svg>
                 <span class="lbl">Giro Nacional</span>
                 <svg class="chev" [class.rot]="giroAbierto" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
               </a>
               @if (giroAbierto) {
                 <div class="sub-nav">
-                  <a class="sub-item" [class.active]="isActive('/giro') && !giroTabPagar && !giroTabDevolver"
+                  <a class="sub-item" data-icon="send_money" [class.active]="isActive('/giro') && !giroTabPagar && !giroTabDevolver"
                      [routerLink]="['/giro']" [queryParams]="{ tab: 'enviar' }" (click)="onNavClick()">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                     Enviar</a>
-                  <a class="sub-item" [class.active]="giroTabPagar"
+                  <a class="sub-item" data-icon="price_check" [class.active]="giroTabPagar"
                      [routerLink]="['/giro']" [queryParams]="{ tab: 'pagar' }" (click)="onNavClick()">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     Pagar</a>
-                  <a class="sub-item" [class.active]="giroTabDevolver"
+                  <a class="sub-item" data-icon="assignment_return" [class.active]="giroTabDevolver"
                      [routerLink]="['/giro']" [queryParams]="{ tab: 'devolver' }" (click)="onNavClick()">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>
                     Devolver</a>
-                  <a class="sub-item" [class.active]="isActive('/historial-giro')"
+                  <a class="sub-item" data-icon="history" [class.active]="isActive('/historial-giro')"
                      routerLink="/historial-giro" (click)="onNavClick()">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     Historial</a>
                 </div>
               }
             </div>
+          </div>
+          <div class="section-divider"></div>
+          <div class="group">
+            <div class="group-h"><span>Tesorería</span></div>
             <!-- Gestión Efectivo (collapsible) -->
             <div class="nav-group" [class.open]="efectivoAbierto">
-              <a class="nav-item" [class.active]="isActive('/movimientos')"
-                 (click)="efectivoAbierto = !efectivoAbierto">
+              <a class="nav-item" data-icon="account_balance_wallet" [class.active]="isActive('/movimientos')"
+                 (click)="toggleGroup('efectivo')" [attr.aria-expanded]="efectivoAbierto">
                 <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><circle cx="5.5" cy="12" r="1"/><circle cx="18.5" cy="12" r="1"/></svg>
                 <span class="lbl">Gestión Efectivo</span>
                 <svg class="chev" [class.rot]="efectivoAbierto" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
               </a>
               @if (efectivoAbierto) {
                 <div class="sub-nav">
-                  <a class="sub-item" [class.active]="isActive('/movimientos') && movGrupo === 'cajero'"
+                  <a class="sub-item" data-icon="swap_horiz" [class.active]="isActive('/movimientos') && movGrupo === 'cajero'"
                      routerLink="/movimientos/cajero" (click)="onNavClick()">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
                     Traspaso a Cajero</a>
-                  <a class="sub-item" [class.active]="isActive('/movimientos') && movGrupo === 'boveda'"
+                  <a class="sub-item" data-icon="lock" [class.active]="isActive('/movimientos') && movGrupo === 'boveda'"
                      routerLink="/movimientos/boveda" (click)="onNavClick()">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V8l7-5 7 5v13"/><line x1="9" y1="21" x2="9" y2="12"/><line x1="15" y1="21" x2="15" y2="12"/></svg>
                     Operaciones de Bóveda</a>
@@ -198,7 +214,7 @@ const ROLES_ADMIN = [ROL_OPERADOR, ROL_ADMIN, ROL_RESP_AGENCIA];
             </div>
             @if (tieneAccesoBancos) {
               <div class="nav-group" [class.open]="bancosAbierto">
-                <a class="nav-item" [class.active]="isActive('/bancos')"
+                <a class="nav-item" data-icon="account_balance" [class.active]="isActive('/bancos')"
                    (click)="toggleBancos()">
                   <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V8l7-5 7 5v13"/><line x1="9" y1="21" x2="9" y2="12"/><line x1="15" y1="21" x2="15" y2="12"/></svg>
                   <span class="lbl">Bancos</span>
@@ -206,33 +222,33 @@ const ROLES_ADMIN = [ROL_OPERADOR, ROL_ADMIN, ROL_RESP_AGENCIA];
                 </a>
                 @if (bancosAbierto) {
                   <div class="sub-nav">
-                    <a class="sub-item" [class.active]="bancosTabActiva === 'cuentas'"
+                    <a class="sub-item" data-icon="credit_card" [class.active]="bancosTabActiva === 'cuentas'"
                        [routerLink]="['/bancos', 'cuentas']" (click)="onNavClick()">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
                       Cuentas y banca</a>
-                    <a class="sub-item" [class.active]="bancosTabActiva === 'traspasos'"
+                    <a class="sub-item" data-icon="sync_alt" [class.active]="bancosTabActiva === 'traspasos'"
                        [routerLink]="['/bancos', 'traspasos']" (click)="onNavClick()">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><line x1="3" y1="5" x2="21" y2="5"/><polyline points="7 23 3 19 7 15"/><line x1="21" y1="19" x2="3" y2="19"/></svg>
                       Traspasos
                       @if (bancosBadge('traspasos') > 0) {
                         <span class="sub-dot">{{ bancosBadge('traspasos') }}</span>
                       }</a>
-                    <a class="sub-item" [class.active]="bancosTabActiva === 'depositos'"
+                    <a class="sub-item" data-icon="swap_vert" [class.active]="bancosTabActiva === 'depositos'"
                        [routerLink]="['/bancos', 'depositos']" (click)="onNavClick()">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                       Depósitos / Retiros</a>
-                    <a class="sub-item" [class.active]="bancosTabActiva === 'movimientos'"
+                    <a class="sub-item" data-icon="list_alt" [class.active]="bancosTabActiva === 'movimientos'"
                        [routerLink]="['/bancos', 'movimientos']" (click)="onNavClick()">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
                       Movimientos</a>
-                    <a class="sub-item" [class.active]="bancosTabActiva === 'cheques'"
+                    <a class="sub-item" data-icon="receipt_long" [class.active]="bancosTabActiva === 'cheques'"
                        [routerLink]="['/bancos', 'cheques']" (click)="onNavClick()">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                       Cheques
                       @if (bancosBadge('cheques') > 0) {
                         <span class="sub-dot">{{ bancosBadge('cheques') }}</span>
                       }</a>
-                    <a class="sub-item" [class.active]="bancosTabActiva === 'conciliacion'"
+                    <a class="sub-item" data-icon="checklist" [class.active]="bancosTabActiva === 'conciliacion'"
                        [routerLink]="['/bancos', 'conciliacion']" (click)="onNavClick()">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
                       Conciliación</a>
@@ -241,25 +257,33 @@ const ROLES_ADMIN = [ROL_OPERADOR, ROL_ADMIN, ROL_RESP_AGENCIA];
               </div>
             }
             @if (tieneAccesoEgresos) {
-              <a class="nav-item" [class.active]="isActive('/egresos-ingresos')"
+              <a class="nav-item" data-icon="swap_vert" [class.active]="isActive('/egresos-ingresos')"
                  routerLink="/egresos-ingresos" (click)="onNavClick()">
                 <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg>
                 <span class="lbl">Egresos / Ingresos</span>
               </a>
             }
-            @if (tieneAccesoConfiguracion) {
-              <a class="nav-item" [class.active]="isActive('/configuracion') || isActive('/gestion-cotizaciones') || isActive('/cotizaciones-programadas')" routerLink="/configuracion" (click)="onNavClick()">
+          </div>
+          @if (tieneAccesoConfiguracion) {
+            <div class="section-divider"></div>
+            <div class="group">
+              <div class="group-h"><span>Administración</span></div>
+              <a class="nav-item" data-icon="settings" [class.active]="isActive('/configuracion') || isActive('/gestion-cotizaciones') || isActive('/cotizaciones-programadas')" routerLink="/configuracion" (click)="onNavClick()">
                 <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06-2.83 2.83-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21h-4v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06-2.83-2.83.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3v-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06 2.83-2.83.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3h4v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06 2.83 2.83-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21v4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                 <span class="lbl">Configuración</span>
               </a>
-            }
-            <a class="nav-item" [class.active]="isActive('/manuales')"
+            </div>
+          }
+          <div class="section-divider"></div>
+          <div class="group">
+            <div class="group-h"><span>Ayuda y soporte</span></div>
+            <a class="nav-item" data-icon="menu_book" [class.active]="isActive('/manuales')"
                routerLink="/manuales/apertura-cajas" (click)="onNavClick()">
               <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M8 7h8M8 11h8"/></svg>
               <span class="lbl">Manuales</span>
             </a>
             @if (auth.rol?.id_rol === 2) {
-              <a class="nav-item" [class.active]="isActive('/evaluacion/manuales')"
+              <a class="nav-item" data-icon="fact_check" [class.active]="isActive('/evaluacion/manuales')"
                  routerLink="/evaluacion/manuales" (click)="onNavClick()">
                 <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                 <span class="lbl">Evaluación</span>
@@ -597,9 +621,10 @@ const ROLES_ADMIN = [ROL_OPERADOR, ROL_ADMIN, ROL_RESP_AGENCIA];
                           <span class="calc-res-label">Destinatario recibe</span>
                           <span class="calc-res-val compra">{{ envioResultRemesa.total_clp | number:'1.0-0' }} CLP</span>
                         </div>
-                      } @else if (envioResultRemesa.equivalente_usd && envioMonedaId === 2) {
+                      }
+                      @if (envioResultRemesa.equivalente_usd && envioMonedaId === 2) {
                         <div class="calc-res-row">
-                          <span class="calc-res-label">Equivalente USD</span>
+                          <span class="calc-res-label">Destinatario recibe</span>
                           <span class="calc-res-val compra">{{ envioResultRemesa.equivalente_usd | number:'1.2-2' }} USD</span>
                         </div>
                       }
@@ -645,23 +670,60 @@ const ROLES_ADMIN = [ROL_OPERADOR, ROL_ADMIN, ROL_RESP_AGENCIA];
 
     /* ===== SIDEBAR ===== */
     .sidebar {
-      width: 252px;
-      background: var(--sidebar-bg, #14213d) !important;
-      color: var(--sidebar-text, #e6ebf5);
+      width: 255px;
+      background: #22272f !important;
+      color: #f1f5f9;
       display: flex;
       flex-direction: column;
       border-right: none !important;
+      overflow: hidden !important;
     }
+    .sidebar .mat-drawer-inner-container { overflow: hidden !important; }
+    .sidebar.compact { width: 68px; }
+    .sidebar.compact .side-head { justify-content: center; padding: 14px 8px 12px; }
+    .sidebar.compact .side-head .logo { width: 34px; height: 34px; object-fit: cover; object-position: left; }
+    .sidebar.compact .group-h span,
+    .sidebar.compact .nav-item .lbl,
+    .sidebar.compact .nav-group .chev,
+    .sidebar.compact .who,
+    .sidebar.compact .trigger-dots { display: none; }
+    .sidebar.compact .group-h { justify-content: center; padding: 8px 0; }
+    .sidebar.compact .nav-item { justify-content: center; padding: 10px; }
+    .sidebar.compact .side-foot { padding: 10px 8px; }
+    .sidebar.compact .user-trigger { justify-content: center; padding: 8px; }
+    .sidebar.compact .user-dropdown {
+      position: fixed;
+      left: 76px;
+      right: auto;
+      bottom: 12px;
+      width: 220px;
+    }
+    /* Un grupo abierto se expande dentro de la barra: es accesible por clic
+       y no depende de paneles flotantes que puedan recortarse. */
+    .sidebar.compact:has(.nav-group.open) { width: 252px; }
+    .sidebar.compact:has(.nav-group.open) .side-head { justify-content: initial; padding: 14px 16px 12px; }
+    .sidebar.compact:has(.nav-group.open) .side-head .logo { width: auto; height: 30px; max-width: 150px; object-fit: contain; }
+    .sidebar.compact:has(.nav-group.open) .group-h span,
+    .sidebar.compact:has(.nav-group.open) .nav-item .lbl,
+    .sidebar.compact:has(.nav-group.open) .nav-group .chev,
+    .sidebar.compact:has(.nav-group.open) .who,
+    .sidebar.compact:has(.nav-group.open) .trigger-dots { display: initial; }
+    .sidebar.compact:has(.nav-group.open) .group-h { justify-content: initial; padding: 6px 10px 4px; }
+    .sidebar.compact:has(.nav-group.open) .nav-item { justify-content: initial; padding: 9px 11px; }
+    .sidebar.compact:has(.nav-group.open) .side-foot { padding: 10px 12px 12px; }
+    .sidebar.compact:has(.nav-group.open) .user-trigger { justify-content: initial; padding: 8px; }
 
     .side-head {
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 14px 16px 12px;
-      border-bottom: 1px solid rgba(255, 255, 255, .08);
+      min-height: 64px;
+      padding: 14px 16px;
+      box-sizing: border-box;
+      border-bottom: 1px solid #353c46;
     }
     .side-head .logo {
-      height: 30px;
+      height: 34px;
       width: auto;
       max-width: 150px;
       object-fit: contain;
@@ -685,43 +747,72 @@ const ROLES_ADMIN = [ROL_OPERADOR, ROL_ADMIN, ROL_RESP_AGENCIA];
     /* ===== NAV ===== */
     .side-nav {
       flex: 1;
+      min-height: 0;
       overflow-y: auto;
-      padding: 10px 8px;
+      overflow-x: hidden;
+      padding: 10px 8px 16px;
     }
     .side-nav::-webkit-scrollbar { width: 6px; }
     .side-nav::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .12); border-radius: 3px; }
 
-    .group { margin-bottom: 12px; }
+    .group { margin-bottom: 4px; }
     .group-h {
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 6px 10px 4px;
+      padding: 10px 8px 5px;
       font-size: 10.5px;
       text-transform: uppercase;
       letter-spacing: .06em;
-      color: #b7c2d2;
+      color: #91a3b7;
       font-weight: 700;
     }
+    .section-divider { height: 1px; background: #353c46; margin: 8px 8px 2px; }
 
     .nav-item {
       display: flex;
       align-items: center;
-      gap: 11px;
-      padding: 9px 11px;
+      min-height: 40px;
+      box-sizing: border-box;
+      gap: 12px;
+      padding: 9px 12px;
       border-radius: 9px;
-      color: #e0e7f0;
+      color: #f1f5f9;
       text-decoration: none;
       font-size: 13.5px;
       font-weight: 500;
-      margin-bottom: 2px;
+      margin: 0 0 2px;
       white-space: nowrap;
       cursor: pointer;
     }
-    .nav-item svg, .nav-item .nav-icon { flex: 0 0 20px; display: flex; align-items: center; }
+    .nav-item > svg:not(.chev), .sub-item > svg { display: none; }
+    .nav-item::before, .sub-item::before {
+      font-family: 'Material Symbols Rounded';
+      font-weight: normal;
+      font-style: normal;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-feature-settings: 'liga';
+      -webkit-font-smoothing: antialiased;
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      color: #cbd5e1;
+    }
+    .nav-item::before { content: attr(data-icon); flex: 0 0 24px; font-size: 22px; }
+    .sub-item::before { content: attr(data-icon); flex: 0 0 20px; font-size: 19px; color: #aab7c6; }
+    .nav-item.active::before { color: #171b21; }
+    .sub-item.active::before { color: #ffb15e; }
+    .nav-item .nav-icon { flex: 0 0 20px; display: flex; align-items: center; }
     .nav-item .lbl { overflow: hidden; text-overflow: ellipsis; }
-    .nav-item:hover { background: rgba(255, 255, 255, .06); color: #fff; }
-    .nav-item.active { background: #F5820A; color: #14213d; font-weight: 700; }
+    .nav-item:hover { background: #2d343e; color: #fff; }
+    .nav-item:focus-visible, .sub-item:focus-visible { outline: 2px solid #ff971f; outline-offset: 2px; }
+    .nav-item.active { background: #f68712; color: #171b21; font-weight: 700; }
+    /* En rutas secundarias el hijo activo expresa la selección; el padre
+       conserva el fondo oscuro tal como el patrón del menú POS. */
+    .nav-group .nav-item.active { background: transparent; color: #f1f5f9; font-weight: 600; }
+    .nav-group .nav-item.active::before { color: #cbd5e1; }
 
     .nav-group { display: block; }
     .nav-group .chev { margin-left: auto; transition: transform .18s ease; opacity: .65; }
@@ -729,26 +820,28 @@ const ROLES_ADMIN = [ROL_OPERADOR, ROL_ADMIN, ROL_RESP_AGENCIA];
     .sub-nav {
       display: flex;
       flex-direction: column;
-      margin: 2px 0 6px 20px;
+      margin: 1px 0 5px 28px;
       padding-left: 10px;
-      border-left: 1px solid rgba(255, 255, 255, .14);
+      border-left: 1px solid #454e5b;
     }
     .sub-item {
       display: flex;
       align-items: center;
-      gap: 6px;
-      padding: 7px 10px;
+      min-height: 33px;
+      box-sizing: border-box;
+      gap: 10px;
+      padding: 7px 9px;
       border-radius: 7px;
       font-size: 12.5px;
-      color: #c7d1df;
+      color: #e2e8f0;
       text-decoration: none;
       white-space: nowrap;
       cursor: pointer;
     }
     .sub-item svg { flex: 0 0 14px; opacity: .7; }
     .sub-item.active svg { opacity: 1; }
-    .sub-item:hover { background: rgba(255, 255, 255, .06); color: #fff; }
-    .sub-item.active { color: #ffb15e; font-weight: 700; background: rgba(245, 130, 52, .2); box-shadow: inset 2px 0 #F5820A; }
+    .sub-item:hover { background: #2d343e; color: #fff; }
+    .sub-item.active { color: #ffb15e; font-weight: 700; background: #493522; box-shadow: inset 2px 0 #f68712; }
     .sub-dot {
       background: #d32f2f; color: #fff; border-radius: 9px;
       padding: 0 6px; font-size: 10.5px; font-weight: 700; flex: 0 0 auto; margin-left: auto;
@@ -936,7 +1029,7 @@ const ROLES_ADMIN = [ROL_OPERADOR, ROL_ADMIN, ROL_RESP_AGENCIA];
 
     /* ===== FOOTER ===== */
     .side-foot {
-      border-top: 1px solid rgba(255, 255, 255, .08);
+      border-top: 1px solid #353c46;
       padding: 10px 12px 12px;
     }
     .user-menu-wrap { position: relative; }
@@ -1158,6 +1251,7 @@ export class ShellComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private cambioService = inject(CambioService);
   private bankingService = inject(BankingService);
+  private cuentaService = inject(CuentaService);
   @ViewChild('sidenav') sidenav!: MatSidenav;
 
   isMobile = window.innerWidth < 860;
@@ -1179,6 +1273,7 @@ export class ShellComponent implements OnInit, OnDestroy {
   pagoRemesaAbierto = false;
   giroAbierto = false;
   efectivoAbierto = false;
+  recargasAbierta = false;
 
   get cambioOp(): string {
     const params = this.router.parseUrl(this.router.url).queryParams;
@@ -1201,6 +1296,9 @@ export class ShellComponent implements OnInit, OnDestroy {
     const params = this.router.parseUrl(this.router.url).queryParams;
     if (params['grupo']) return params['grupo'];
     return params['op'] === 'traspaso_cajero' ? 'cajero' : 'boveda';
+  }
+  get recargasVista(): string {
+    return this.router.parseUrl(this.router.url).queryParams['vista'] || 'realizadas';
   }
 
   get tieneAccesoBancos(): boolean {
@@ -1234,6 +1332,38 @@ export class ShellComponent implements OnInit, OnDestroy {
     if (url.startsWith('/pago-remesa') || url.startsWith('/historial-pago-remesa')) this.pagoRemesaAbierto = true;
     if (url.startsWith('/giro') || url.startsWith('/historial-giro')) this.giroAbierto = true;
     if (url.startsWith('/movimientos')) this.efectivoAbierto = true;
+    if (url.startsWith('/recargas')) this.recargasAbierta = true;
+    this.guardarGruposAbiertos();
+  }
+
+  toggleGroup(group: 'cambio' | 'recargas' | 'remesa' | 'pagoRemesa' | 'giro' | 'efectivo'): void {
+    const estados: Record<string, () => void> = {
+      cambio: () => this.cambioAbierto = !this.cambioAbierto,
+      recargas: () => this.recargasAbierta = !this.recargasAbierta,
+      remesa: () => this.remesaAbierta = !this.remesaAbierta,
+      pagoRemesa: () => this.pagoRemesaAbierto = !this.pagoRemesaAbierto,
+      giro: () => this.giroAbierto = !this.giroAbierto,
+      efectivo: () => this.efectivoAbierto = !this.efectivoAbierto,
+    };
+    estados[group]();
+    this.guardarGruposAbiertos();
+  }
+
+  private restaurarGruposAbiertos(): void {
+    try {
+      const abiertos = JSON.parse(localStorage.getItem('pos_sidebar_open_groups') || '[]') as string[];
+      this.cambioAbierto = abiertos.includes('cambio'); this.recargasAbierta = abiertos.includes('recargas');
+      this.remesaAbierta = abiertos.includes('remesa'); this.pagoRemesaAbierto = abiertos.includes('pagoRemesa');
+      this.giroAbierto = abiertos.includes('giro'); this.efectivoAbierto = abiertos.includes('efectivo');
+      this.bancosAbierto = abiertos.includes('bancos');
+    } catch {}
+  }
+
+  private guardarGruposAbiertos(): void {
+    try {
+      const abiertos = [this.cambioAbierto && 'cambio', this.recargasAbierta && 'recargas', this.remesaAbierta && 'remesa', this.pagoRemesaAbierto && 'pagoRemesa', this.giroAbierto && 'giro', this.efectivoAbierto && 'efectivo', this.bancosAbierto && 'bancos'].filter(Boolean);
+      localStorage.setItem('pos_sidebar_open_groups', JSON.stringify(abiertos));
+    } catch {}
   }
 
   private sincronizarBancos(url: string): void {
@@ -1249,6 +1379,7 @@ export class ShellComponent implements OnInit, OnDestroy {
 
   toggleBancos(): void {
     this.bancosAbierto = !this.bancosAbierto;
+    this.guardarGruposAbiertos();
   }
 
   bancosPendientes = 0;
@@ -1429,6 +1560,8 @@ export class ShellComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadTheme();
+    this.cargarPreferenciasCuenta();
+    this.restaurarGruposAbiertos();
 
     this.autoExpandGroups(this.router.url);
     if (this.router.url.includes('/bancos')) this.bancosAbierto = true;
@@ -1465,6 +1598,23 @@ export class ShellComponent implements OnInit, OnDestroy {
     this.cargarDestinos();
     this.initEnvioCalc();
   }
+
+  private cargarPreferenciasCuenta(): void {
+    this.cuentaService.obtener().subscribe({
+      next: cuenta => {
+        this.themeMode = cuenta.configuracion.apariencia;
+        try { localStorage.setItem('pos_theme_mode', this.themeMode); } catch {}
+        this.applyTheme();
+        if (this.router.url === '/dashboard' && cuenta.configuracion.inicio !== 'dashboard') {
+          this.router.navigate(['/', cuenta.configuracion.inicio]);
+        }
+      },
+      error: () => {},
+    });
+  }
+
+  @HostListener('window:pos-preferences-updated')
+  onPreferencesUpdated(): void { this.cargarPreferenciasCuenta(); }
 
   private cargarCotizaciones(): void {
     this.cambioService.cotizaciones().subscribe({

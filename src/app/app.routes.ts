@@ -23,6 +23,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/caja/caja.component').then(m => m.CajaComponent),
       },
       {
+        path: 'cuenta',
+        loadComponent: () => import('./features/cuenta/cuenta.component').then(m => m.CuentaComponent),
+      },
+      {
         path: 'manuales/apertura-cajas',
         loadComponent: () => import('./features/manuales/manuales.component').then(m => m.ManualesComponent),
       },
@@ -49,6 +53,10 @@ export const routes: Routes = [
       {
         path: 'manuales/pago-remesas',
         loadComponent: () => import('./features/manuales/manuales-pago-remesas.component').then(m => m.ManualesPagoRemesasComponent),
+      },
+      {
+        path: 'manuales/recargas',
+        loadComponent: () => import('./features/manuales/manuales-recargas.component').then(m => m.ManualesRecargasComponent),
       },
       {
         path: 'manuales/videos',
