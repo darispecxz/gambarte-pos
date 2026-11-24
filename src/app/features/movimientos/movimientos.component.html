@@ -6,7 +6,7 @@
         <div><h1>{{ tituloVista }}</h1><p>{{ descripcionVista }}</p></div>
       </header>
 
-      <div class="no-cajas" *ngIf="!loading && cajasAbiertas.length === 0"><mat-icon>info</mat-icon><span>No tienes cajas abiertas. Abre una desde <strong>Mis Cajas</strong> para registrar movimientos.</span></div>
+      <div class="no-cajas" *ngIf="!loading && cajasAbiertas.length === 0"><mat-icon>info</mat-icon><span>No tienes cajas abiertas. Abre una desde <strong>Apertura / Cierre de Caja</strong> para registrar movimientos.</span></div>
 
       <section class="movement-list-card" *ngIf="cajas.length">
         <header class="list-header">

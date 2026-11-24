@@ -62,18 +62,17 @@ interface MonedaSelection {
     @if (mode === 'overview') {
       <div class="page-head">
         <div class="head-left">
-          <h1>Punto de Venta</h1>
+          <h1>Apertura / Cierre de Caja</h1>
           <p class="date">{{ agenciaDesc }} — {{ hoy }}</p>
         </div>
         <div class="head-actions">
-          <button class="manual-trigger" type="button" (click)="irAlManualApertura()" aria-label="Abrir manual de apertura de cajas">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
-            Manual de apertura
-          </button>
-          <button class="manual-trigger" type="button" (click)="irAlManualCierre()" aria-label="Abrir manual de cierre de cajas">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
-            Manual de cierre
-          </button>
+          @if (totalAbiertas > 0) {
+            <button class="manual-trigger manual-help" type="button" (click)="irAlManualCierre()"
+                    aria-label="Abrir manual de cierre de cajas" title="Manual de cierre de caja">?</button>
+          } @else {
+            <button class="manual-trigger manual-help" type="button" (click)="irAlManualApertura()"
+                    aria-label="Abrir manual de apertura de cajas" title="Manual de apertura de caja">?</button>
+          }
           <div class="head-stats" *ngIf="!loading && cajas.length">
             <div class="hstat">
               <span class="hstat-v">{{ totalMonedas }}</span>
@@ -131,6 +130,12 @@ interface MonedaSelection {
               </div>
             </div>
             <div class="cph-actions">
+              @if (reporteTipo(pc); as tipoReporte) {
+                <button class="btn btn-outline" (click)="abrirReporte(pc.monedas[0].id_caja, tipoReporte)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h8"/></svg>
+                  Reporte de {{ tipoReporte }}
+                </button>
+              }
               @if (canOpen(pc)) {
                 <button class="btn btn-primary" (click)="startApertura(pc)">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
@@ -152,7 +157,6 @@ interface MonedaSelection {
                 <tr>
                   <th>Moneda</th>
                   <th>Estado</th>
-                  <th class="col-right">Saldo</th>
                   <th class="col-right hide-sm">Rango</th>
                   <th class="hide-sm">Apertura</th>
                   <th class="hide-sm">Cierre</th>
@@ -173,9 +177,6 @@ interface MonedaSelection {
                         <span class="status-dot"></span>
                         {{ estadoLabel(m) }}
                       </span>
-                    </td>
-                    <td class="col-right">
-                      <span class="saldo-num" [class.saldo-warn]="isSaldoWarning(m)">{{ m.saldo_actual | number:'1.2-2' }}</span>
                     </td>
                     <td class="col-right hide-sm">
                       <span class="range-text">{{ m.minimo | number:'1.0-0' }} — {{ m.maximo | number:'1.0-0' }}</span>
@@ -539,12 +540,6 @@ interface MonedaSelection {
     .status-pending { background: #FEF3C7; color: #92400E; }
     .status-pending .status-dot { background: #d97706; }
 
-    .saldo-num {
-      font-family: 'JetBrains Mono', 'Menlo', monospace;
-      font-weight: 600; font-size: 14px; color: var(--text-primary, #14213d);
-      font-variant-numeric: tabular-nums;
-    }
-    .saldo-warn { color: #DC2626; }
     .range-text { font-size: 12px; color: var(--text-secondary, #6b7280); font-variant-numeric: tabular-nums; }
     .time-text { font-family: 'JetBrains Mono', 'Menlo', monospace; font-size: 12px; color: var(--text-secondary, #5b6472); }
     .na-text { color: var(--border, #d1d5db); }
@@ -1005,6 +1000,12 @@ export class CajaComponent implements OnInit {
     return pc.monedas.some(m => m.sesion_hoy?.estado === 'abierta');
   }
 
+  reporteTipo(pc: PhysicalCaja): 'apertura' | 'cierre' | null {
+    if (pc.monedas.some(m => m.sesion_hoy?.estado === 'abierta')) return 'apertura';
+    if (pc.monedas.some(m => m.sesion_hoy?.estado === 'cerrada')) return 'cierre';
+    return null;
+  }
+
   get bovedaCerrada(): boolean {
     return this.cajas.length > 0 && this.cajas.every(c => !c.boveda_abierta);
   }
@@ -1025,12 +1026,6 @@ export class CajaComponent implements OnInit {
     }
   }
 
-  isSaldoWarning(caja: CajaInfo): boolean {
-    if (caja.saldo_actual > caja.maximo) return true;
-    if (caja.saldo_actual < caja.minimo && caja.sesion_hoy?.estado === 'abierta') return true;
-    return false;
-  }
-
   formatTime(dateStr: string): string {
     try {
       const d = new Date(dateStr);
@@ -1038,6 +1033,17 @@ export class CajaComponent implements OnInit {
     } catch {
       return dateStr;
     }
+  }
+
+  abrirReporte(idCaja: number, tipo: 'apertura' | 'cierre'): void {
+    this.cajeroService.descargarReporteCajaPdf(idCaja, tipo).subscribe({
+      next: pdf => {
+        const url = URL.createObjectURL(pdf);
+        window.open(url, '_blank', 'noopener');
+        setTimeout(() => URL.revokeObjectURL(url), 60_000);
+      },
+      error: err => this.snack.open(err.message || 'No se pudo generar el reporte', 'OK', { duration: 5000 }),
+    });
   }
 
   // ===== APERTURA =====
@@ -1415,8 +1421,17 @@ export class CajaComponent implements OnInit {
     });
   }
 
-  confirmSubmit(): void {
+  async confirmSubmit(): Promise<void> {
     if (this.submitting) return;
+    let justificacion = '';
+    if (this.mode === 'cierre') {
+      const hayDiferencia = this.steps.some(s => !s.isExtra && s.caja.saldo_actual != null && Math.abs(s.totalCalculado - s.caja.saldo_actual) > 0.0001);
+      if (hayDiferencia) {
+        const result = await Swal.fire({ title: 'Declaración jurada requerida', input: 'textarea', inputLabel: 'Explique el motivo del faltante o sobrante. Su firma digital y esta declaración serán enviadas a RRHH.', inputPlaceholder: 'Describa la causa, las verificaciones realizadas y la acción tomada…', inputAttributes: { minlength: '20' }, showCancelButton: true, confirmButtonText: 'Firmar y continuar', cancelButtonText: 'Cancelar', preConfirm: value => value?.trim().length >= 20 ? value.trim() : Swal.showValidationMessage('Debe ingresar al menos 20 caracteres.') });
+        if (!result.isConfirmed) return;
+        justificacion = result.value;
+      }
+    }
     this.submitting = true;
 
     const calls: any[] = [];
@@ -1437,7 +1452,7 @@ export class CajaComponent implements OnInit {
         if (step.isExtra) {
           calls.push(this.cajeroService.cierreConApertura(step.caja.id_caja, montos));
         } else {
-          calls.push(this.cajeroService.cierre(step.caja.id_caja, montos));
+          calls.push(this.cajeroService.cierre(step.caja.id_caja, montos, justificacion));
         }
       }
     }

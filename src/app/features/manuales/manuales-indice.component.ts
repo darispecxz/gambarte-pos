@@ -85,6 +85,10 @@ export class ManualesIndiceComponent {
       { number: '22', title: 'Pago por depósito', subtitle: 'Registro y acreditación', path: '/manuales/pago-remesas', type: 'deposito' },
       { number: '23', title: 'Reporte de pagos', subtitle: 'Consulta, filtros y detalle', path: '/manuales/pago-remesas', type: 'reporte' },
     ] },
+    { title: 'Gestión de recargas', icon: '◉', items: [
+      { number: '24', title: 'Recargas realizadas', subtitle: 'Consulta de confirmadas', path: '/manuales/recargas', type: 'realizadas' },
+      { number: '25', title: 'Pendientes por procesar', subtitle: 'Procesar solicitudes', path: '/manuales/recargas', type: 'pendientes' },
+    ] },
     { title: 'Gestión Efectivo', icon: '▣', items: [
       { number: '08', title: 'Traspaso a Cajero', subtitle: 'Entre cajas abiertas', path: '/manuales/gestion-efectivo', type: 'cajero' },
       { number: '09', title: 'Operaciones de Bóveda', subtitle: 'Solicitar y enviar fondos', path: '/manuales/gestion-efectivo', type: 'boveda' },
