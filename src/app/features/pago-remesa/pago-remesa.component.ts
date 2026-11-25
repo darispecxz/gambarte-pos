@@ -1,3 +1,4 @@
+import { WhatsAppDocumentComponent } from '../../shared/whatsapp-document/whatsapp-document.component';
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroupDirective, FormsModule, NgForm } from '@angular/forms';
@@ -51,7 +52,7 @@ class ImmediateInvalidErrorMatcher implements ErrorStateMatcher {
 @Component({
   selector: 'app-pago-remesa',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatSnackBarModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatIconModule, MatButtonModule, MatCheckboxModule],
+  imports: [WhatsAppDocumentComponent, CommonModule, FormsModule, MatSnackBarModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatIconModule, MatButtonModule, MatCheckboxModule],
   template: `
     <div class="page" [class.detail-mode]="!!remesaBuscada">
       <!-- HEADER -->
@@ -107,6 +108,9 @@ class ImmediateInvalidErrorMatcher implements ErrorStateMatcher {
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Comprobante PDF
               </button>
+              @if (pagoExitoso.id_pago) {
+                <app-whatsapp-document type="COMPROBANTE_PAGO_REMESA" [operationId]="pagoExitoso.id_pago!" />
+              }
               <button class="btn secondary" (click)="mostrarEmailDialog()">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                 Enviar por Email

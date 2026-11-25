@@ -1,3 +1,4 @@
+import { WhatsAppDocumentComponent } from '../../shared/whatsapp-document/whatsapp-document.component';
 import { Component, inject, OnInit, OnDestroy, QueryList, ViewChildren } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -43,7 +44,7 @@ class RequiredValueErrorStateMatcher implements ErrorStateMatcher {
 @Component({
   selector: 'app-remesa',
   standalone: true,
-  imports: [
+  imports: [WhatsAppDocumentComponent, 
     CommonModule, FormsModule, RouterLink, MatSnackBarModule,
     MatFormFieldModule, MatInputModule, TextFieldModule, MatSelectModule, MatIconModule, MatSlideToggleModule,
     SearchableSelectComponent, TelInputComponent,
@@ -1246,6 +1247,8 @@ class RequiredValueErrorStateMatcher implements ErrorStateMatcher {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
               Factura
             </button>
+            <app-whatsapp-document type="FACTURA_REMESA" [operationId]="resultado.id_remesa" label="WhatsApp factura" />
+            <app-whatsapp-document type="COMPROBANTE_REMESA" [operationId]="resultado.id_remesa" label="WhatsApp comprobante" />
             <button class="btn-primary" (click)="nuevaRemesa()">Nueva Remesa</button>
           </div>
         </div>

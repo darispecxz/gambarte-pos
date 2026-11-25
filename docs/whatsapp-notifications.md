@@ -1,0 +1,2 @@
+# WhatsApp pilot
+Requires corresponding API branch and SQL migration. No Evolution credentials in Angular. Controls are hidden when the backend feature is disabled. The registered destination (or explicit synthetic test destination) is confirmed by the cashier before dispatch. Provider acceptance does not imply delivery. No automatic retries. Initial scope: change, international remittance, paid remittance and remittance histories. National giro and recargas await verified PDF generators. Use only fictitious documents in the pilot.

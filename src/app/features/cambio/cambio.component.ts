@@ -1,3 +1,4 @@
+import { WhatsAppDocumentComponent } from '../../shared/whatsapp-document/whatsapp-document.component';
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
@@ -37,7 +38,7 @@ const OBSERVACIONES_PREDEFINIDAS = [
 @Component({
   selector: 'app-cambio',
   standalone: true,
-  imports: [
+  imports: [WhatsAppDocumentComponent, 
     CommonModule, FormsModule, ReactiveFormsModule, MatSnackBarModule,
     MatFormFieldModule, MatInputModule, MatSelectModule, MatIconModule,
     SearchableSelectComponent, TelInputComponent, RouterLink,
@@ -1050,6 +1051,7 @@ const OBSERVACIONES_PREDEFINIDAS = [
           }
           <div class="form-actions no-print">
             @if (resultado.factura) {
+              <app-whatsapp-document type="FACTURA_CAMBIO" [operationId]="resultado.id_cambio" label="WhatsApp factura" />
               <button class="btn-secondary" (click)="abrirPdfPopup('factura')">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                 Imprimir Factura
